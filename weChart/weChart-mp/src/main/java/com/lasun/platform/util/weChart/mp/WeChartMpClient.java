@@ -44,7 +44,11 @@ public final class WeChartMpClient {
      * 初始化bean类、token对象
      */
     public void init() {
-
+        //加载配置文件
+        loadProperties();
+        //TODO tokenManager中 如何获取配置信息
+        this.configManager.init();
+        this.tokenManager.init();
     }
 
     private void loadProperties() {
@@ -56,14 +60,25 @@ public final class WeChartMpClient {
                 Class<?> tokenManagerClass = Class.forName(properties.getProperty("wx.client.tokenManager", "com.lasun.platform.util.weChart.mp.config.impl.DefaultAccessTokenManager"));
                 if (AccessTokenManager.class.isAssignableFrom(tokenManagerClass)) {
                     this.tokenManager = (AccessTokenManager) tokenManagerClass.newInstance();
-                }else{
-                    logger.warn(tokenManagerClass.getName()+"不是AccessTokenManager的子类");
+                } else {
+                    logger.warn(tokenManagerClass.getName() + "类型错误，tokenManager将使用默认管理器");
+                    this.tokenManager = new DefaultAccessTokenManager();
                 }
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
+                logger.warn("tokenManager初始化失败，将使用默认值");
+                this.tokenManager = new DefaultAccessTokenManager();
             }
-
-            Class<? extends WeChartConfigManager> configManagerClass = (Class<? extends WeChartConfigManager>) Class.forName(properties.getProperty("wx.client.configManager", "com.lasun.platform.util.weChart.mp.config.impl.DefaultWeChartConfigManager"));
+            try {
+                Class<?> configManagerClass = Class.forName(properties.getProperty("wx.client.configManager", "com.lasun.platform.util.weChart.mp.config.impl.DefaultWeChartConfigManager"));
+                if (WeChartConfigManager.class.isAssignableFrom(configManagerClass)) {
+                    this.configManager = (WeChartConfigManager) configManagerClass.newInstance();
+                } else {
+                    logger.warn(configManagerClass.getName() + "不是一个WeChartConfigManager的子类");
+                }
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                logger.warn("configManager初始化失败，将使用默认值");
+                this.configManager = new DefaultWeChartConfigManager();
+            }
 
         } catch (IOException e) {
             this.tokenManager = new DefaultAccessTokenManager();

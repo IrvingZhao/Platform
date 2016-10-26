@@ -2,7 +2,7 @@ package com.lasun.platform.util.weChart.base.message;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.lasun.platform.util.base.serial.SerialUtil;
+import cn.irving.zhao.util.base.serial.SerialUtil;
 import com.lasun.platform.util.weChart.base.config.message.WeChartMessageConfig;
 import com.lasun.platform.util.weChart.base.config.enums.WeChartMessageFormat;
 

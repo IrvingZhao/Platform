@@ -1,10 +1,10 @@
 package com.lasun.platform.util.weChart.base.message.send;
 
 
-import com.lasun.platform.util.base.serial.SerialUtil;
-import com.lasun.platform.util.remote.http.HttpClient;
-import com.lasun.platform.util.remote.http.config.HttpMethod;
-import com.lasun.platform.util.remote.http.message.HttpMessage;
+import cn.irving.zhao.util.base.serial.SerialUtil;
+import cn.irving.zhao.util.remote.http.HttpClient;
+import cn.irving.zhao.util.remote.http.config.HttpMethod;
+import cn.irving.zhao.util.remote.http.message.HttpMessage;
 import com.lasun.platform.util.weChart.base.config.enums.WeChartMessageFormat;
 import com.lasun.platform.util.weChart.base.config.message.WeChartMessageConfig;
 

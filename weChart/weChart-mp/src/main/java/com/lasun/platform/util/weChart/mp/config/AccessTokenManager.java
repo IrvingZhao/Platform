@@ -4,6 +4,12 @@ package com.lasun.platform.util.weChart.mp.config;
  * Token管理器接口
  */
 public interface AccessTokenManager {
+
+    /**
+     * 初始化数据
+     */
+    void init();
+
     /**
      * 刷新指定name值的token
      *

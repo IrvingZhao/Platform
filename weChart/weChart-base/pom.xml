@@ -3,19 +3,18 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>lasun-util-wechart</artifactId>
-        <groupId>com.lasun.platform.util</groupId>
+        <artifactId>irving-util-wechart</artifactId>
+        <groupId>cn.irving.zhao.util.wechart</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.lasun.platform.util.wechart</groupId>
-    <artifactId>lasun-util-wechart-base</artifactId>
+    <artifactId>irving-util-wechart-base</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.lasun.platform.util.remote</groupId>
-            <artifactId>lasun-util-remote-http</artifactId>
+            <groupId>cn.irving.zhao.util.remote</groupId>
+            <artifactId>irving-util-remote-http</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

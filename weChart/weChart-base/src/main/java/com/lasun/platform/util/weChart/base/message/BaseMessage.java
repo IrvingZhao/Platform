@@ -1,6 +1,6 @@
 package com.lasun.platform.util.weChart.base.message;
 
-import com.lasun.platform.util.base.serial.SerialUtil;
+import cn.irving.zhao.util.base.serial.SerialUtil;
 
 /**
  * 基础消息

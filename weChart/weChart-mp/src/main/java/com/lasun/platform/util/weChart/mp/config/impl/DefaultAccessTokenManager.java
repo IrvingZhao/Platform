@@ -12,6 +12,14 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DefaultAccessTokenManager implements AccessTokenManager {
 
     /**
+     * 初始化数据
+     */
+    @Override
+    public void init() {
+
+    }
+
+    /**
      * 刷新指定name值的token
      *
      * @param name 配置的name值
