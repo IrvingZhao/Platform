@@ -6,9 +6,11 @@ package cn.irving.zhao.util.weChart.mp.config;
 public interface AccessTokenManager {
 
     /**
-     * 初始化数据
+     * 初始化token值
+     *
+     * @param configManager 微信账户配置信息
      */
-    void init();
+    void init(WeChartConfigManager configManager);
 
     /**
      * 刷新指定name值的token

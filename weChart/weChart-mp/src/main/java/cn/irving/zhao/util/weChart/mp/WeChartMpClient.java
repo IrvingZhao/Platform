@@ -41,43 +41,72 @@ public final class WeChartMpClient {
     //  token刷新器的实现、配置以及默认实现
 
     /**
-     * 初始化bean类、token对象
+     * <p>初始化微信账户管理器、token管理器</p>
+     * <p>当账户管理器或token管理器为null时，采用配置文件形式进行账户管理器与token管理器实例化</p>
      */
     public void init() {
-        //加载配置文件
-        loadProperties();
-        //TODO tokenManager中 如何获取配置信息
+        if (this.configManager == null || this.tokenManager == null) {
+            loadProperties();
+        }
         this.configManager.init();
-        this.tokenManager.init();
+        this.tokenManager.init(this.configManager);
     }
 
-    private void loadProperties() {
-        //TODO 加载配置文件   读取配置项，设置默认值
+    /**
+     * <p>加载配置文件，实例化微信账户管理器、token管理器</p>
+     * <p>配置文件地址默认为：/conf/wx.client.properties</p>
+     */
+    public void loadProperties() {
+        //TODO 缺少账户管理器、token管理器是否存在检查，存在则忽略
         try {
             Properties properties = new Properties();
             properties.load(WeChartMpClient.class.getResourceAsStream(propertyPath));
             try {
-                Class<?> tokenManagerClass = Class.forName(properties.getProperty("wx.client.tokenManager", "DefaultAccessTokenManager"));
-                if (AccessTokenManager.class.isAssignableFrom(tokenManagerClass)) {
+                //初始化configManager
+                configManager:
+                if (this.configManager == null) {
+                    String configManagerClassName = properties.getProperty("wx.client.configManager");
+                    Class<?> configManagerClass;
+                    if (configManagerClassName == null || configManagerClassName.equals("")) {
+                        this.configManager = new DefaultWeChartConfigManager();
+                        logger.warn("配置文件中不包含wx.client.configManager项，configManager使用默认值");
+                        break configManager;
+                    }
+                    configManagerClass = Class.forName(configManagerClassName);
+                    if (!WeChartConfigManager.class.isAssignableFrom(configManagerClass)) {
+                        this.configManager = new DefaultWeChartConfigManager();
+                        logger.warn(configManagerClassName + "不是一个有效的cn.irving.zhao.util.weChart.mp.config.WeChartConfigManager类型");
+                        break configManager;
+                    }
+                    this.configManager = (WeChartConfigManager) configManagerClass.newInstance();
+                }
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                logger.warn("tokenManager初始化失败，将使用默认值");
+                this.configManager = new DefaultWeChartConfigManager();
+            }
+
+            try {
+                //初始化configManager
+                tokenManager:
+                if (this.tokenManager == null) {
+                    String tokenManagerClassName = properties.getProperty("wx.client.tokenManager");
+                    Class<?> tokenManagerClass;
+                    if (tokenManagerClassName == null || tokenManagerClassName.equals("")) {
+                        this.tokenManager = new DefaultAccessTokenManager();
+                        logger.warn("配置文件中不包含wx.client.tokenManager，tokenManager使用默认值");
+                        break tokenManager;
+                    }
+                    tokenManagerClass = Class.forName(tokenManagerClassName);
+                    if (!AccessTokenManager.class.isAssignableFrom(tokenManagerClass)) {
+                        this.tokenManager = new DefaultAccessTokenManager();
+                        logger.warn(tokenManagerClassName + "不是一个有效的cn.irving.zhao.util.weChart.mp.config.AccessTokenManager类型");
+                        break tokenManager;
+                    }
                     this.tokenManager = (AccessTokenManager) tokenManagerClass.newInstance();
-                } else {
-                    logger.warn(tokenManagerClass.getName() + "类型错误，tokenManager将使用默认管理器");
-                    this.tokenManager = new DefaultAccessTokenManager();
                 }
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 logger.warn("tokenManager初始化失败，将使用默认值");
                 this.tokenManager = new DefaultAccessTokenManager();
-            }
-            try {
-                Class<?> configManagerClass = Class.forName(properties.getProperty("wx.client.configManager", "DefaultWeChartConfigManager"));
-                if (WeChartConfigManager.class.isAssignableFrom(configManagerClass)) {
-                    this.configManager = (WeChartConfigManager) configManagerClass.newInstance();
-                } else {
-                    logger.warn(configManagerClass.getName() + "不是一个WeChartConfigManager的子类");
-                }
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                logger.warn("configManager初始化失败，将使用默认值");
-                this.configManager = new DefaultWeChartConfigManager();
             }
 
         } catch (IOException e) {
