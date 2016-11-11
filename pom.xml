@@ -11,6 +11,7 @@
         <module>base</module>
         <module>remote</module>
         <module>weChart</module>
+        <module>poi</module>
     </modules>
     <packaging>pom</packaging>
 
