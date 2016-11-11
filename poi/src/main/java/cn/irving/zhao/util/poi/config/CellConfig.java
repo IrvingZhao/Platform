@@ -3,32 +3,42 @@ package cn.irving.zhao.util.poi.config;
 import cn.irving.zhao.util.poi.enums.RepeatMethod;
 import cn.irving.zhao.util.poi.formatter.ColumnFormatter;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ColumnConfig {
+public class CellConfig {
 
-    private final List<ColumnPosition> columnPositions = new ArrayList<>();
+    private final List<CellPosition> columnPositions = new ArrayList<>();
     private RepeatMethod repeat = RepeatMethod.NONE;
     private ColumnFormatter formatter;
     private boolean isPrimary;
     private int transverseIdentity;//横向增长
     private int portraitIdentity;//纵向增长
+    private Field cellField;
 
-    public ColumnConfig addPosition(int rowIndex, int cellIndex) {
-        columnPositions.add(new ColumnPosition(rowIndex, cellIndex));
+    CellConfig addPosition(int rowIndex, int cellIndex) {
+        columnPositions.add(new CellPosition(rowIndex, cellIndex));
         return this;
     }
 
-    public List<ColumnPosition> getColumnPositions() {
+    public List<CellPosition> getColumnPositions() {
         return columnPositions;
+    }
+
+    public RepeatMethod getRepeat() {
+        return repeat;
+    }
+
+    void setRepeat(RepeatMethod repeat) {
+        this.repeat = repeat;
     }
 
     public ColumnFormatter getFormatter() {
         return formatter;
     }
 
-    public void setFormatter(ColumnFormatter formatter) {
+    void setFormatter(ColumnFormatter formatter) {
         this.formatter = formatter;
     }
 
@@ -36,7 +46,7 @@ public class ColumnConfig {
         return isPrimary;
     }
 
-    public void setPrimary(boolean primary) {
+    void setPrimary(boolean primary) {
         isPrimary = primary;
     }
 
@@ -44,7 +54,7 @@ public class ColumnConfig {
         return transverseIdentity;
     }
 
-    public void setTransverseIdentity(int transverseIdentity) {
+    void setTransverseIdentity(int transverseIdentity) {
         this.transverseIdentity = transverseIdentity;
     }
 
@@ -52,11 +62,15 @@ public class ColumnConfig {
         return portraitIdentity;
     }
 
-    public void setPortraitIdentity(int portraitIdentity) {
+    void setPortraitIdentity(int portraitIdentity) {
         this.portraitIdentity = portraitIdentity;
     }
 
-    public RepeatMethod getRepeat() {
-        return repeat;
+    public Field getCellField() {
+        return cellField;
+    }
+
+    void setCellField(Field cellField) {
+        this.cellField = cellField;
     }
 }

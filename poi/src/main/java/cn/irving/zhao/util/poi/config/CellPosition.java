@@ -1,13 +1,13 @@
 package cn.irving.zhao.util.poi.config;
 
-public class ColumnPosition {
+public class CellPosition {
     private int rowIndex;
     private int cellIndex;
 
-    public ColumnPosition() {
+    public CellPosition() {
     }
 
-    public ColumnPosition(int rowIndex, int cellIndex) {
+    public CellPosition(int rowIndex, int cellIndex) {
         this.rowIndex = rowIndex;
         this.cellIndex = cellIndex;
     }

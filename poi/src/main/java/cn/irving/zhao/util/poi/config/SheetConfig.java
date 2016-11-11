@@ -8,9 +8,11 @@ public class SheetConfig {
     private InputStream template;//TODO 更改 template用法
     private String sheetName;
     private int sheetIndex;
-    private List<ColumnConfig> columns = new ArrayList<>();
+    private final List<CellConfig> columns = new ArrayList<>();
 
-    public SheetConfig() {
+    public SheetConfig addColumn(CellConfig column) {
+        columns.add(column);
+        return this;
     }
 
     public InputStream getTemplate() {
@@ -19,6 +21,10 @@ public class SheetConfig {
 
     public void setTemplate(InputStream template) {
         this.template = template;
+    }
+    public void setTemplate(String template) {
+//        this.template = template;
+        //TODO 根据地址读取模板流
     }
 
     public String getSheetName() {
@@ -37,7 +43,7 @@ public class SheetConfig {
         this.sheetIndex = sheetIndex;
     }
 
-    public List<ColumnConfig> getColumns() {
+    public List<CellConfig> getColumns() {
         return columns;
     }
 }
