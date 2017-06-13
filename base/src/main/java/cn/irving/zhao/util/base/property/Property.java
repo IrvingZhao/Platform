@@ -3,15 +3,19 @@ package cn.irving.zhao.util.base.property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
 
 /**
- * 属性自动加载类<br />
- * 类将自动加载Classpath下的所有.properties文件。<br />
- * 文件中key值冲突时，后加载的文件将覆盖先加载的文件。<br />
+ * <p>属性自动加载类</p>
+ * <p>类将自动加载Classpath下的所有.properties文件。</p>
+ * <p>文件中key值冲突时，后加载的文件将覆盖先加载的文件。</p>
  *
  * @author Irving.Zhao
  * @version 1.0
@@ -21,6 +25,11 @@ public final class Property {
 
     private static final Properties properties = new Properties();
     private static Logger logger = LoggerFactory.getLogger(Property.class);
+    //Entry转mapCollector
+    private static final Collector<Map.Entry<Object, Object>, HashMap<String, String>, HashMap<String, String>> mapCollector = Collector.of((Supplier<HashMap<String, String>>) HashMap::new, (t, a) -> t.put(String.valueOf(a.getKey()), String.valueOf(a.getValue())), (l, r) -> {
+        l.putAll(r);
+        return l;
+    });
 
     static {
         loadProperties();
@@ -50,11 +59,10 @@ public final class Property {
      * @param file 目录
      */
     public static void loadProperties(File file) {
-        File item = null;
         try {
             File[] propertyFiles = file.listFiles((pathname) -> pathname.isDirectory() || (pathname.isFile() && pathname.getName().indexOf("properties") > 0));
-            for (int i = 0; i < propertyFiles.length; i++) {
-                item = propertyFiles[i];
+            assert propertyFiles != null;
+            for (File item : propertyFiles) {
                 if (item.isFile()) {
                     properties.load(new FileReader(item));
                 } else if (item.isDirectory()) {
@@ -62,9 +70,9 @@ public final class Property {
                 }
             }
         } catch (IOException e) {
-            logger.error("文件不存在（" + item.getName() + "）", e);
             e.printStackTrace();
         }
+
     }
 
 
@@ -72,6 +80,7 @@ public final class Property {
      * 通过键获得配置文件中的值
      *
      * @param key 键
+     * @return 返回匹配到的值
      */
     public static String get(String key) {
         return properties.getProperty(key);
@@ -86,16 +95,9 @@ public final class Property {
     public static String[] getValues(String pattern) {
         Pattern pat = Pattern.compile(pattern);
         Set<Map.Entry<Object, Object>> entries = properties.entrySet();
-        List<String> values = new ArrayList<>(entries.size());
-        entries.forEach((entry) -> {
-            Object key = entry.getKey();
-            Object value = entry.getValue();
-            if (key != null && value != null) {
-                if (pat.matcher(key.toString()).matches()) {
-                    values.add(value.toString());
-                }
-            }
-        });
+        List<String> values = entries.parallelStream()
+                .filter((item) -> pat.matcher(item.getKey().toString()).matches())
+                .collect(ArrayList<String>::new, (t, a) -> t.add(String.valueOf(a.getValue())), ArrayList::addAll);
         return values.toArray(new String[]{});
     }
 
@@ -117,17 +119,9 @@ public final class Property {
      * @return 所有匹配到的键值对
      */
     public static Map<String, String> getKeyValues(Pattern pattern) {
-        Map<String, String> result = new HashMap<>();
         Set<Map.Entry<Object, Object>> entries = properties.entrySet();
-        entries.forEach((entry) -> {
-            Object key = entry.getKey();
-            Object value = entry.getValue();
-            if (key != null && value != null) {
-                if (pattern.matcher(key.toString()).matches()) {
-                    result.put(String.valueOf(key), String.valueOf(value));
-                }
-            }
-        });
-        return result;
+        return entries.parallelStream()
+                .filter((item) -> pattern.matcher(item.getKey().toString()).matches())
+                .collect(mapCollector);
     }
 }

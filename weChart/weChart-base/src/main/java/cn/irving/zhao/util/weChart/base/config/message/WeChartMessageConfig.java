@@ -2,7 +2,6 @@ package cn.irving.zhao.util.weChart.base.config.message;
 
 import cn.irving.zhao.util.weChart.base.config.enums.WeChartMessageFormat;
 import cn.irving.zhao.util.weChart.base.config.enums.WeChartMessageRequestMethod;
-import cn.irving.zhao.util.weChart.base.message.BaseOutputMessage;
 
 /**
  * <p>微信消息体配置信息</p>
@@ -20,8 +19,7 @@ public class WeChartMessageConfig {
     /**
      * 根据请求输出类获得bean类配置
      */
-    public WeChartMessageConfig(BaseOutputMessage outputMessage) {
-        WeChartMessage weChartMessage = outputMessage.getClass().getAnnotation(WeChartMessage.class);
+    public WeChartMessageConfig(WeChartMessage weChartMessage) {
         if (weChartMessage == null) {
             isSecurity = false;
             requestMethod = WeChartMessageRequestMethod.GET;

@@ -1,14 +1,16 @@
 package cn.irving.zhao.util.weChart.base.message.send;
 
-
-import cn.irving.zhao.util.base.serial.SerialUtil;
+import cn.irving.zhao.util.base.serial.ObjectStringSerialUtil;
 import cn.irving.zhao.util.remote.http.HttpClient;
-import cn.irving.zhao.util.remote.http.config.HttpMethod;
+import cn.irving.zhao.util.remote.http.enums.HttpMethod;
+import cn.irving.zhao.util.remote.http.enums.RequestType;
 import cn.irving.zhao.util.remote.http.message.HttpMessage;
 import cn.irving.zhao.util.weChart.base.config.enums.WeChartMessageFormat;
 import cn.irving.zhao.util.weChart.base.config.message.WeChartMessageConfig;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * 消息发送器
@@ -18,47 +20,106 @@ import java.io.InputStream;
  * @since 1.0
  */
 public class MessageSender {
-    private SerialUtil serialUtil = SerialUtil.getSerialUtil();
+    private static final ObjectStringSerialUtil serialUtil = ObjectStringSerialUtil.getSerialUtil();
     private HttpClient httpUtil = new HttpClient();
 
-    public BaseSendInputMessage sendMessage(BaseSendOutputMessage outputMessage) {
+    /**
+     * 发送微信请求
+     * */
+    public <T extends BaseSendInputMessage> T sendMessage(BaseSendOutputMessage<T> outputMessage) {
         WeChartMessageConfig messageConfig = outputMessage.getMessageConfig();
-        HttpMessage httpMessage = new HttpMessage(outputMessage.getUrl());
+        BaseHttpMessage httpMessage = new BaseHttpMessage(outputMessage);
 
-
-        switch (messageConfig.getRequestMethod()) {
-            case GET:
-                httpMessage.setMethod(HttpMethod.GET);
-                break;
-            case POST:
-                httpMessage.setMethod(HttpMethod.POST);
-                break;
-        }
-        WeChartMessageFormat requestFormat = messageConfig.getRequestType();
-        switch (requestFormat) {
-            case FORM:
-                httpMessage.addParameters(outputMessage.getParamMap());
-                break;
-            case XML:
-                httpMessage.setRequestStream(serialUtil.serial(outputMessage, SerialUtil.SerialType.XML));
-                break;
-            case JSON:
-                httpMessage.setRequestStream(serialUtil.serial(outputMessage, SerialUtil.SerialType.JSON));
-                break;
-        }
         httpUtil.sendMessage(httpMessage);
-        InputStream responseStream = httpMessage.getResponseStream();
-        SerialUtil.SerialType serialType = SerialUtil.SerialType.JSON;
+        ObjectStringSerialUtil.SerialType serialType = ObjectStringSerialUtil.SerialType.JSON;
         switch (messageConfig.getResponseType()) {
             case JSON:
-                serialType = SerialUtil.SerialType.JSON;
+                serialType = ObjectStringSerialUtil.SerialType.JSON;
                 break;
             case XML:
-                serialType = SerialUtil.SerialType.XML;
+                serialType = ObjectStringSerialUtil.SerialType.XML;
                 break;
         }
-        Class<? extends BaseSendInputMessage> outputClass = outputMessage.getInputMessageClass();
-        BaseSendInputMessage result = serialUtil.parse(responseStream, outputClass, serialType);
-        return result;
+        Class<T> outputClass = outputMessage.getInputMessageClass();
+        return serialUtil.parse(httpMessage.responseStream, outputClass, serialType);
     }
+
+    private static class BaseHttpMessage implements HttpMessage {
+        private String url;
+        private HttpMethod httpMethod = HttpMethod.GET;
+        private RequestType requestType = RequestType.NORMAL;
+        private Map requestParams;
+        private InputStream requestStream;
+        private int resultCode;
+        private InputStream responseStream;
+
+
+        BaseHttpMessage(BaseSendOutputMessage outputMessage) {
+            WeChartMessageConfig messageConfig = outputMessage.getMessageConfig();
+            this.url = outputMessage.getUrl();
+            switch (messageConfig.getRequestMethod()) {
+                case POST:
+                    this.httpMethod = HttpMethod.POST;
+                case GET:
+                    this.httpMethod = HttpMethod.GET;
+            }
+            WeChartMessageFormat requestFormat = messageConfig.getRequestType();
+            switch (requestFormat) {
+                case FORM:
+                    this.requestParams = outputMessage.getParamMap();
+                    break;
+                case XML:
+                    this.requestStream = new ByteArrayInputStream(serialUtil.serial(outputMessage, ObjectStringSerialUtil.SerialType.XML).getBytes());
+                    break;
+                case JSON:
+                    this.requestStream = new ByteArrayInputStream(serialUtil.serial(outputMessage, ObjectStringSerialUtil.SerialType.JSON).getBytes());
+                    break;
+            }
+        }
+
+        @Override
+        public String getRequestUrl() {
+            return url;
+        }
+
+        @Override
+        public void replaceRequestUrl(String url) {
+            this.url = url;
+        }
+
+        @Override
+        public HttpMethod getRequestMethod() {
+            return httpMethod;
+        }
+
+        @Override
+        public RequestType getRequestType() {
+            return requestType;
+        }
+
+        @Override
+        public Map<String, Object> getRequestParams() {
+            return requestParams;
+        }
+
+        @Override
+        public InputStream getRequestStream() {
+            return requestStream;
+        }
+
+        @Override
+        public void setResponseCode(int code) {
+            this.resultCode = code;
+        }
+
+        @Override
+        public void setResponseHead(Map<String, String> head) {
+        }
+
+        @Override
+        public void setResponseStream(InputStream inputStream) {
+            this.responseStream = inputStream;
+        }
+    }
+
 }

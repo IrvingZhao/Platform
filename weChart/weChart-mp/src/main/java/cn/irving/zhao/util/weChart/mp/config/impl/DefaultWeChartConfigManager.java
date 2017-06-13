@@ -1,20 +1,32 @@
 package cn.irving.zhao.util.weChart.mp.config.impl;
 
+
+import cn.irving.zhao.util.base.property.Property;
 import cn.irving.zhao.util.weChart.mp.config.WeChartConfigManager;
 import cn.irving.zhao.util.weChart.mp.config.WeChartMpConfig;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-/**
- * Created by irving on 2016/10/17.
- */
+/***
+ * 默认加载
+ * */
 public class DefaultWeChartConfigManager implements WeChartConfigManager {
+
+    private String propertyPath="/conf/wx.mp.properties";
+
+    private Pattern configPattern=Pattern.compile("wx\\.(.*)\\.(.*)");
+
+    private Map<String,WeChartMpConfig> configMap=new HashMap<>();
+
     /**
      * 管理器初始化
      */
     @Override
     public void init() {
-
+        loadWeChartConfig();
     }
 
     /**
@@ -22,7 +34,17 @@ public class DefaultWeChartConfigManager implements WeChartConfigManager {
      */
     @Override
     public void loadWeChartConfig() {
-
+        configMap.clear();
+        Map<String,Map<String,String>> configCache=new HashMap<>();
+        Property.getKeyValues(configPattern).forEach((key, value)->{
+            Matcher matcher=configPattern.matcher(key);
+            Map<String, String> itemConfig = configCache.computeIfAbsent(matcher.group(1), k -> new HashMap<String, String>());
+            itemConfig.put(matcher.group(2),value);
+        });
+        configCache.forEach((key,value)->{
+            WeChartMpConfig config=new WeChartMpConfig(value.get("appId"),value.get("appSecurity"),value.get("securityToken"),value.get("encodingAesKey"),value.get("messageType"));
+            configMap.put(key,config);
+        });
     }
 
     /**
@@ -32,14 +54,14 @@ public class DefaultWeChartConfigManager implements WeChartConfigManager {
      */
     @Override
     public WeChartMpConfig getConfig(String name) {
-        return null;
+        return configMap.get(name);
     }
 
     /**
      * 获得所有微信账户配置
      */
     @Override
-    public Map<String, WeChartConfigManager> getConfigs() {
-        return null;
+    public Map<String, WeChartMpConfig> getConfigs() {
+        return configMap;
     }
 }

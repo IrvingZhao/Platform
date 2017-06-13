@@ -1,11 +1,8 @@
 package cn.irving.zhao.util.remote.http;
 
-import cn.irving.zhao.util.remote.http.config.HttpMethod;
-import cn.irving.zhao.util.remote.RemoteClient;
-import cn.irving.zhao.util.remote.exception.RemoteException;
 import cn.irving.zhao.util.remote.http.config.ClientConfig;
-import cn.irving.zhao.util.remote.http.config.RequestType;
-import cn.irving.zhao.util.remote.http.config.SSLConfig;
+import cn.irving.zhao.util.remote.http.enums.HttpMethod;
+import cn.irving.zhao.util.remote.http.enums.RequestType;
 import cn.irving.zhao.util.remote.http.message.HttpMessage;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
@@ -45,41 +42,43 @@ import java.util.*;
 /**
  * 请求发送类
  * <p>
- * 同一个对象视为同一个回话
+ * 同一个对象视为同一个会话
  * </p>
  *
  * @author 赵嘉楠
  * @version 1.0
  * @since 1.0
  */
-public class HttpClient implements RemoteClient<HttpMessage> {
+public class HttpClient {
 
     private CloseableHttpClient client;
-    private Charset clientCharset;
+    private ClientConfig config;
     private MimetypesFileTypeMap mimetypesFileTypeMap = new MimetypesFileTypeMap();
+    private Charset charset;
 
-    /**
-     * 默认构建
-     */
     public HttpClient() {
-        this(new ClientConfig());
+        this(null);
+    }
+
+    public HttpClient(ClientConfig config) {
+        this.config = config;
+        generateClient();
+    }
+
+    public void setClientConfig(ClientConfig config) {
+        this.config = config;
+        generateClient();
     }
 
     /**
-     * 构建请求发送类
-     *
-     * @param clientConfig 发送类配置
+     * 根据配置信息重新生成请求客户端
      */
-    public HttpClient(ClientConfig clientConfig) {
-        HttpClientBuilder builder = HttpClients.custom();
-        if (clientConfig.getSSlConfig() != null) {
-            SSLConnectionSocketFactory sslConnectionSocketFactory = getSSLFactory(clientConfig.getSSlConfig());
-            if (sslConnectionSocketFactory != null) {
-                builder.setSSLSocketFactory(sslConnectionSocketFactory);
-            }
-        }
-        this.clientCharset = clientConfig.getCharset();
-        client = builder.build();
+    private void generateClient() {
+        HttpClientBuilder clientBuilder = HttpClients.custom();
+        generateSSLFactory(clientBuilder);
+        this.charset = this.config.getCharset();
+        this.client = clientBuilder.build();
+
     }
 
     /**
@@ -91,23 +90,24 @@ public class HttpClient implements RemoteClient<HttpMessage> {
         try {
             HttpUriRequest request;
             HttpEntity entity = generateHttpEntity(message);
-            if (message.getMethod() == HttpMethod.GET) {
+            if (message.getRequestMethod() == HttpMethod.GET) {
                 try {
-                    String paramStr = EntityUtils.toString(entity, clientCharset);
-                    String url = message.getUrl();
+                    String paramStr = EntityUtils.toString(entity, charset);
+                    String url = message.getRequestUrl();
                     url = url + (url.contains("?") ? "&" : "?") + paramStr;
-                    message.setUrl(url);
+                    message.replaceRequestUrl(url);
                     entity = null;
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
             }
-            request = generateRequest(message.getUrl(), message.getMethod());
+            request = generateRequest(message.getRequestUrl(), message.getRequestMethod());
+            message.getRequestHead().entrySet().forEach(item -> request.addHeader(item.getKey(), item.getValue()));
             if (entity != null) {
                 request.setEntity(entity);
             }
             CloseableHttpResponse response = client.execute(request);
-            message.setResultCode(response.getCode());
+            message.setResponseCode(response.getCode());
             Header[] headers = response.getAllHeaders();
             Map<String, String> responseHeader = new HashMap<>(headers.length);
             for (Header item : headers) {
@@ -126,7 +126,7 @@ public class HttpClient implements RemoteClient<HttpMessage> {
     private HttpEntity generateHttpEntity(HttpMessage message) {
         HttpEntity result = null;
         RequestType type = message.getRequestType();
-        if (message.getMethod() == HttpMethod.GET) {
+        if (message.getRequestMethod() == HttpMethod.GET) {
             result = buildUrlEncodingEntity(message.getRequestParams());
         } else if (type == RequestType.NORMAL) {
             result = buildUrlEncodingEntity(message.getRequestParams());
@@ -143,7 +143,7 @@ public class HttpClient implements RemoteClient<HttpMessage> {
      */
     private HttpEntity buildMultipartEntity(Map<String, Object> requestParams) {
         MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
-        entityBuilder.setCharset(clientCharset);
+        entityBuilder.setCharset(charset);
         requestParams.entrySet().forEach((item) -> {
             Object value = item.getValue();
             if (value == null) {
@@ -154,9 +154,9 @@ public class HttpClient implements RemoteClient<HttpMessage> {
             } else if (InputStream.class.isAssignableFrom(value.getClass())) {
                 entityBuilder.addBinaryBody(item.getKey(), (InputStream) value);
             } else if (String.class.isAssignableFrom(value.getClass())) {
-                entityBuilder.addTextBody(item.getKey(), (String) value, ContentType.create("text/plan", clientCharset));
+                entityBuilder.addTextBody(item.getKey(), (String) value, ContentType.create("text/plan", charset));
             } else {
-                entityBuilder.addTextBody(item.getKey(), value.toString(), ContentType.create("text/plan", clientCharset));
+                entityBuilder.addTextBody(item.getKey(), value.toString(), ContentType.create("text/plan", charset));
             }
         });
         return entityBuilder.build();
@@ -168,14 +168,14 @@ public class HttpClient implements RemoteClient<HttpMessage> {
     private UrlEncodedFormEntity buildUrlEncodingEntity(Map<String, Object> requestParams) {
         List<NameValuePair> params = new ArrayList<>(requestParams.size());
         requestParams.entrySet().forEach((item) -> params.add(new BasicNameValuePair(item.getKey(), Objects.toString(item.getValue(), ""))));
-        return new UrlEncodedFormEntity(params, clientCharset);
+        return new UrlEncodedFormEntity(params, charset);
     }
 
     /**
      * 构建流请求体
      */
     private InputStreamEntity buildStreamEntity(InputStream stream) {
-        return new InputStreamEntity(stream, ContentType.create("application/octet-stream", clientCharset));
+        return new InputStreamEntity(stream, ContentType.create("application/octet-stream", charset));
     }
 
     /**
@@ -187,31 +187,31 @@ public class HttpClient implements RemoteClient<HttpMessage> {
             result.setURI(URI.create(url));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new RemoteException("无法创建[%s]的请求方法", e, method.name());
+            throw new RuntimeException("无法创建["+method.name()+"]的请求方法", e);
         }
     }
 
     /**
-     * 构建自定义证书配置
+     * 构建Https链接工厂
      */
-    private SSLConnectionSocketFactory getSSLFactory(SSLConfig sslConfig) {
+    private void generateSSLFactory(HttpClientBuilder clientBuilder) {
         try {
-            KeyStore trustStore = KeyStore.getInstance(sslConfig.getKeyStoreType().name());
-            InputStream keyStream;
-            if (sslConfig.getPath().contains("classpath:")) {
-                keyStream = HttpClient.class.getResourceAsStream(sslConfig.getPath().replace("classpath:", ""));
-            } else {
-                keyStream = new FileInputStream(sslConfig.getPath());
+            if (this.config.getCertificateKey().length() > 0 && this.config.getCertificatePath().length() > 0) {
+                KeyStore trustStore = KeyStore.getInstance(this.config.getCertificateType().name());
+                InputStream keyStream;
+                if (this.config.getCertificatePath().contains("classpath:")) {
+                    keyStream = HttpClient.class.getResourceAsStream(this.config.getCertificatePath().replace("classpath:", ""));
+                } else {
+                    keyStream = new FileInputStream(this.config.getCertificatePath());
+                }
+                trustStore.load(keyStream, this.config.getCertificateKey().toCharArray());
+                keyStream.close();
+                SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(trustStore, new TrustSelfSignedStrategy()).build();
+                clientBuilder.setSSLSocketFactory(new SSLConnectionSocketFactory(sslContext, new String[]{"TLSv1"}, null, SSLConnectionSocketFactory.getDefaultHostnameVerifier()));
             }
-            trustStore.load(keyStream, sslConfig.getKey().toCharArray());
-            keyStream.close();
-
-            SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(trustStore, new TrustSelfSignedStrategy()).build();
-            return new SSLConnectionSocketFactory(sslContext, new String[]{"TLSv1"}, null, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
-        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | KeyManagementException e) {
+        } catch (NullPointerException | KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | KeyManagementException e) {
             e.printStackTrace();
         }
-        return null;
     }
-}
 
+}

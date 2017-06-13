@@ -1,7 +1,7 @@
 package cn.irving.zhao.util.weChart.base.message.send;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import cn.irving.zhao.util.weChart.base.message.BaseOutputMessage;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -18,15 +18,12 @@ import java.util.Map;
  * @version 1.0
  * @since 1.0
  */
-public abstract class BaseSendOutputMessage extends BaseOutputMessage {
+public abstract class BaseSendOutputMessage<T extends BaseSendInputMessage> extends BaseOutputMessage<T> {
     @JsonIgnore
     public abstract String getUrl();
 
     @JsonIgnore
-    public abstract Class<? extends BaseSendInputMessage> getInputMessageClass();
-
-    @JsonIgnore
-    public Map<String, Object> getParamMap() {
+    Map<String, Object> getParamMap() {
         Map<String, Object> result = null;
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(this.getClass(), BaseSendOutputMessage.class);

@@ -1,6 +1,6 @@
 package cn.irving.zhao.util.weChart.base.message;
 
-import cn.irving.zhao.util.base.serial.SerialUtil;
+import cn.irving.zhao.util.base.serial.ObjectStringSerialUtil;
 
 /**
  * 基础消息
@@ -10,5 +10,5 @@ import cn.irving.zhao.util.base.serial.SerialUtil;
  * @since 1.0
  */
 public abstract class BaseMessage {
-    protected SerialUtil serialUtil = SerialUtil.getSerialUtil();
+    protected ObjectStringSerialUtil serialUtil = ObjectStringSerialUtil.getSerialUtil();
 }

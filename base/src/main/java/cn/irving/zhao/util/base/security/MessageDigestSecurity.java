@@ -1,5 +1,7 @@
 package cn.irving.zhao.util.base.security;
 
+import cn.irving.zhao.util.base.serial.StringByteSerialUtil;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.DigestInputStream;
@@ -16,6 +18,7 @@ import java.security.NoSuchAlgorithmException;
 public class MessageDigestSecurity {
     public static MessageDigestSecurity MD5 = new MessageDigestSecurity("MD5");
     public static MessageDigestSecurity SHA256 = new MessageDigestSecurity("SHA-256");
+    public static MessageDigestSecurity SHA512 = new MessageDigestSecurity("SHA-512");
 
     public static MessageDigestSecurity newInstances(String securityType) {
         return new MessageDigestSecurity(securityType);
@@ -50,17 +53,13 @@ public class MessageDigestSecurity {
     public String encrypt(InputStream content) {
         try {
             DigestInputStream din = new DigestInputStream(content, messageDigest);
-            int buferSize = 0x4000000 < content.available() ? 0x4000000 : content.available();
-            byte[] buffer = new byte[buferSize];
+            int bufferSize = 0x4000000 < content.available() ? 0x4000000 : content.available();
+            byte[] buffer = new byte[bufferSize];
             int tmp = 0;
-            while (din.read(buffer, tmp * buferSize, buferSize) > -1) ;
+            while (din.read(buffer, tmp * bufferSize, bufferSize) > -1) ;
             din.close();
             byte[] digest = messageDigest.digest();
-            StringBuffer result = new StringBuffer();
-            for (int i = 0; i < digest.length; i++) {
-                result.append(Integer.toHexString(digest[i] & 0xFF));
-            }
-            return result.toString();
+            return StringByteSerialUtil.byteToHex(digest);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -74,13 +73,11 @@ public class MessageDigestSecurity {
      * @return 密文
      */
     public String encrypt(byte[] content) {
-        StringBuffer result = new StringBuffer();
-        byte[] securityByte = messageDigest.digest(content);
-        for (int i = 0; i < securityByte.length; i++) {
-            byte item = securityByte[i];
-            result.append(Integer.toHexString(item & 0xFF));
-        }
-        return result.toString();
+        return StringByteSerialUtil.byteToHex(encryptByte(content));
+    }
+
+    private byte[] encryptByte(byte[] content) {
+        return messageDigest.digest(content);
     }
 
     /**
@@ -91,7 +88,7 @@ public class MessageDigestSecurity {
      * @return true-正确 false-错误
      */
     public boolean validate(String content, String security) {
-        return security.equals(encrypt(content.getBytes()));
+        return validate(content.getBytes(), security);
     }
 
     /**
@@ -102,7 +99,8 @@ public class MessageDigestSecurity {
      * @return true-正确 false-错误
      */
     public boolean validate(byte[] content, String security) {
-        return security.equals(encrypt(content));
+        byte[] securityByte = encryptByte(content);
+        return security.equals(StringByteSerialUtil.byteToHex(securityByte)) || security.equals(hackHexString(securityByte));
     }
 
     /**
@@ -114,5 +112,16 @@ public class MessageDigestSecurity {
      */
     public boolean validate(InputStream content, String security) {
         return security.equals(encrypt(content));
+    }
+
+    private String hackHexString(byte[] bytes) {
+        if (bytes == null) {
+            return null;
+        }
+        StringBuilder result = new StringBuilder();
+        for (byte aByte : bytes) {
+            result.append(Integer.toHexString(aByte & 0xFF));
+        }
+        return result.toString();
     }
 }

@@ -21,12 +21,15 @@ public interface WeChartConfigManager {
      * 获得指定name值的微信配置信息
      *
      * @param name name值
+     * @return 微信配置信息
      */
     WeChartMpConfig getConfig(String name);
 
     /**
      * 获得所有微信账户配置
+     *
+     * @return 所有微信配置信息
      */
-    Map<String, WeChartConfigManager> getConfigs();
+    Map<String, WeChartMpConfig> getConfigs();
 
 }

@@ -1,6 +1,5 @@
 package cn.irving.zhao.util.base.security;
 
-
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -37,6 +36,7 @@ public final class AESSecurity {
      * @param needKeyGenerator 是否需要生成秘钥
      * @param cipherType       加密方式
      * @param charset          内容编码
+     * @return AES加密工具类
      */
     public AESSecurity newInstances(Boolean needKeyGenerator, String cipherType, Charset charset) {
         return new AESSecurity(needKeyGenerator, cipherType, charset);
@@ -110,11 +110,12 @@ public final class AESSecurity {
     public void encrypt(InputStream content, String password, byte[] iv, OutputStream output) {
         try {
             Cipher cipher = generateCipher(password, Cipher.ENCRYPT_MODE, iv);
-            int bufferSize = 0x4000000 < content.available() ? 0x4000000 : content.available();
-            byte[] buffered = new byte[bufferSize];
             CipherInputStream cipherInputStream = new CipherInputStream(content, cipher);
-            while (cipherInputStream.read(buffered) > -1) {
-                output.write(buffered);
+            int bufferSize = 0x4000000 < content.available() ? 0x4000000 : content.available();
+            int i = 0;
+            byte[] buffered = new byte[bufferSize];
+            while ((i = cipherInputStream.read(buffered)) > -1) {
+                output.write(buffered, 0, i);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -208,6 +209,8 @@ public final class AESSecurity {
             while (content.read(buffered) > -1) {
                 cipherOutputStream.write(buffered);
             }
+            cipherOutputStream.flush();
+            cipherOutputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -244,8 +247,13 @@ public final class AESSecurity {
 
     /**
      * 生成加密器
+     *
+     * @param password    密钥
+     * @param encryptMode 加密或解密
+     * @param ivs         IV 向量
+     * @return 返回java加密器
      */
-    private Cipher generateCipher(String password, int encryptMode, byte[] ivs) {
+    public Cipher generateCipher(String password, int encryptMode, byte[] ivs) {
         try {
             byte[] keyBytes;
             if (keyGenerator) {

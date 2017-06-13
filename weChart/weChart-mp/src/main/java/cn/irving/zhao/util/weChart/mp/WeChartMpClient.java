@@ -1,15 +1,13 @@
 package cn.irving.zhao.util.weChart.mp;
 
-import cn.irving.zhao.util.weChart.mp.config.impl.DefaultAccessTokenManager;
-import cn.irving.zhao.util.weChart.mp.config.AccessTokenManager;
 import cn.irving.zhao.util.weChart.mp.config.WeChartConfigManager;
 import cn.irving.zhao.util.weChart.mp.config.impl.DefaultWeChartConfigManager;
+import cn.irving.zhao.util.weChart.mp.token.AccessTokenManager;
+import cn.irving.zhao.util.weChart.mp.token.impl.DefaultAccessTokenManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -22,6 +20,7 @@ import java.util.Properties;
  * </ul>
  */
 public final class WeChartMpClient {
+    //TODO 添加  transient static 配置区域
 
     private Logger logger = LoggerFactory.getLogger(WeChartMpClient.class);
     /**
@@ -31,8 +30,6 @@ public final class WeChartMpClient {
 
     private AccessTokenManager tokenManager;
     private WeChartConfigManager configManager;
-
-    private Map<String, String> configProperties = new HashMap<>();
 
     //微信公众号配置文件
     //AccessTokenManager类
@@ -57,7 +54,6 @@ public final class WeChartMpClient {
      * <p>配置文件地址默认为：/conf/wx.client.properties</p>
      */
     public void loadProperties() {
-        //TODO 缺少账户管理器、token管理器是否存在检查，存在则忽略
         try {
             Properties properties = new Properties();
             properties.load(WeChartMpClient.class.getResourceAsStream(propertyPath));
@@ -116,4 +112,15 @@ public final class WeChartMpClient {
         }
     }
 
+    public static void sendMessage(){
+        //TODO SendMessage
+    }
+
+    public String getPropertyPath() {
+        return propertyPath;
+    }
+
+    public void setPropertyPath(String propertyPath) {
+        this.propertyPath = propertyPath;
+    }
 }
