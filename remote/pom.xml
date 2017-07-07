@@ -3,17 +3,16 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>irving-util-parent</artifactId>
+        <artifactId>util-parent</artifactId>
         <groupId>cn.irving.zhao.util</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cn.irving.zhao.util.remote</groupId>
-    <artifactId>irving-util-remote-parent</artifactId>
+    <artifactId>util-remote-parent</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>remote-api</module>
         <module>remote-http</module>
     </modules>
 

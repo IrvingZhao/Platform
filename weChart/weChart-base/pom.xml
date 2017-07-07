@@ -3,23 +3,23 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>irving-util-wechart</artifactId>
+        <artifactId>util-wechart</artifactId>
         <groupId>cn.irving.zhao.util.wechart</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>irving-util-wechart-base</artifactId>
+    <artifactId>util-wechart-base</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>cn.irving.zhao.util.remote</groupId>
-            <artifactId>irving-util-remote-http</artifactId>
+            <artifactId>util-remote-http</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>cn.irving.zhao.util</groupId>
-            <artifactId>irving-util-base</artifactId>
+            <artifactId>util-base</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
