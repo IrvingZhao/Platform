@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cn.irving.zhao.util.wechart</groupId>
-    <artifactId>util-wechart</artifactId>
+    <artifactId>util-wechart-parent</artifactId>
     <packaging>pom</packaging>
     <modules>
         <module>weChart-base</module>
