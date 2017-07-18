@@ -5,7 +5,7 @@ import java.lang.annotation.*;
 /**
  * 单元页配置信息
  */
-@Target({ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface Sheet {
