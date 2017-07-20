@@ -1,7 +1,7 @@
 package cn.irving.zhao.util.poi;
 
-import cn.irving.zhao.util.poi.annotation.MergedRegion;
-import cn.irving.zhao.util.poi.annotation.Repeatable;
+import cn.irving.zhao.util.poi.annotation.cell.MergedRegion;
+import cn.irving.zhao.util.poi.annotation.cell.Repeatable;
 import cn.irving.zhao.util.poi.enums.Direction;
 import cn.irving.zhao.util.poi.enums.OutputType;
 import org.apache.poi.ss.usermodel.*;
@@ -26,7 +26,7 @@ public class POIUtil {
             }
             Workbook workbook = outputType.createWorkbook();
 
-            cn.irving.zhao.util.poi.annotation.Sheet sheetConfig = data.getClass().getAnnotation(cn.irving.zhao.util.poi.annotation.Sheet.class);
+            cn.irving.zhao.util.poi.annotation.sheet.Sheet sheetConfig = data.getClass().getAnnotation(cn.irving.zhao.util.poi.annotation.sheet.Sheet.class);
 
             Sheet sheet = getSheet(workbook, sheetConfig.name());
 
@@ -58,11 +58,11 @@ public class POIUtil {
             for (int i = 0; i < fields.length; i++) {
                 Field item = fields[i];
                 item.setAccessible(true);
-                cn.irving.zhao.util.poi.annotation.Cell cellConfig = item.getAnnotation(cn.irving.zhao.util.poi.annotation.Cell.class);
+                cn.irving.zhao.util.poi.annotation.cell.Cell cellConfig = item.getAnnotation(cn.irving.zhao.util.poi.annotation.cell.Cell.class);
                 MergedRegion mergedRegion = item.getAnnotation(MergedRegion.class);
                 if (mergedRegion != null) {
-                    cn.irving.zhao.util.poi.annotation.Cell start = mergedRegion.start();
-                    cn.irving.zhao.util.poi.annotation.Cell end = mergedRegion.end();
+                    cn.irving.zhao.util.poi.annotation.cell.Cell start = mergedRegion.start();
+                    cn.irving.zhao.util.poi.annotation.cell.Cell end = mergedRegion.end();
                     Repeatable repeatable = item.getAnnotation(Repeatable.class);
                     if (repeatable != null) {
                         Collection<?> collection = (Collection<?>) item.get(data);

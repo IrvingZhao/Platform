@@ -1,12 +1,44 @@
 package cn.irving.zhao.util.poi.config.cell;
 
-import cn.irving.zhao.util.poi.annotation.MergedRegion;
-import cn.irving.zhao.util.poi.annotation.Repeatable;
+import cn.irving.zhao.util.poi.annotation.cell.Cell;
+import cn.irving.zhao.util.poi.annotation.cell.MergedRegion;
+import cn.irving.zhao.util.poi.annotation.cell.Repeatable;
 
 /**
  * 单元格配置信息
  */
 public class CellConfig {
+
+    public CellConfig(int row, int col) {
+        this.row = row;
+        this.col = col;
+    }
+
+    public CellConfig(int row, int col, CellRepeatConfig repeatConfig) {
+        this.row = row;
+        this.col = col;
+        this.repeatConfig = repeatConfig;
+    }
+
+    public CellConfig(int row, int col, CellMergedConfig mergedConfig) {
+        this.row = row;
+        this.col = col;
+        this.mergedConfig = mergedConfig;
+    }
+
+    public CellConfig(int row, int col, CellRepeatConfig repeatConfig, CellMergedConfig mergedConfig) {
+        this.row = row;
+        this.col = col;
+        this.repeatConfig = repeatConfig;
+
+        this.mergedConfig = mergedConfig;
+    }
+
+    public CellConfig(Cell config) {
+        this.row = config.row();
+        this.col = config.col();
+    }
+
     private int row;
     private int col;
     private CellRepeatConfig repeatConfig;

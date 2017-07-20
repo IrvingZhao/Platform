@@ -1,6 +1,6 @@
 package cn.irving.zhao.util.poi.config.cell;
 
-import cn.irving.zhao.util.poi.annotation.MergedRegion;
+import cn.irving.zhao.util.poi.annotation.cell.MergedRegion;
 
 /**
  * 合并单元格配置
