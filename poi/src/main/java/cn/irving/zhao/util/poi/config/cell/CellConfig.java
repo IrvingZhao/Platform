@@ -4,6 +4,8 @@ import cn.irving.zhao.util.poi.annotation.cell.Cell;
 import cn.irving.zhao.util.poi.annotation.cell.MergedRegion;
 import cn.irving.zhao.util.poi.annotation.cell.Repeatable;
 
+import java.lang.reflect.Field;
+
 /**
  * 单元格配置信息
  */
@@ -30,13 +32,18 @@ public class CellConfig {
         this.row = row;
         this.col = col;
         this.repeatConfig = repeatConfig;
-
         this.mergedConfig = mergedConfig;
     }
 
-    public CellConfig(Cell config) {
+    public CellConfig(Cell config, Repeatable repeatable, MergedRegion mergedRegion) {
         this.row = config.row();
         this.col = config.col();
+        if (repeatable != null) {
+            this.repeatConfig = new CellRepeatConfig(repeatable);
+        }
+        if (mergedRegion != null) {
+            this.mergedConfig = new CellMergedConfig(mergedRegion);
+        }
     }
 
     private int row;

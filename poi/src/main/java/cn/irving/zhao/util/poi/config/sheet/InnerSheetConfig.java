@@ -15,6 +15,12 @@ public class InnerSheetConfig extends SheetConfig {
         this.baseCol = config.baseCol();
     }
 
+    public InnerSheetConfig(InnerSheet config, SheetConfig sheetConfig) {
+        this(config);
+        super.getCells().addAll(sheetConfig.getCells());
+        super.getInnerSheets().addAll(sheetConfig.getInnerSheets());
+    }
+
     /**
      * @param baseRow 基准行
      * @param baseCol 基准列
