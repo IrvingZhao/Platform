@@ -1,6 +1,6 @@
 package cn.irving.zhao.util.poi.config.cell;
 
-import cn.irving.zhao.util.poi.annotation.cell.Repeatable;
+import cn.irving.zhao.util.poi.annotation.Repeatable;
 import cn.irving.zhao.util.poi.enums.Direction;
 
 /**

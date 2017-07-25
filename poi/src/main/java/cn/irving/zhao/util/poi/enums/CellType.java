@@ -5,7 +5,7 @@ import org.apache.poi.ss.usermodel.Cell;
 /**
  * Cell类型
  */
-public enum CellDataType {
+public enum CellType {
 
     NUMERIC(Cell.CELL_TYPE_NUMERIC),
     STRING(Cell.CELL_TYPE_STRING),
@@ -14,7 +14,7 @@ public enum CellDataType {
     BOOLEAN(Cell.CELL_TYPE_BOOLEAN),
     ERROR(Cell.CELL_TYPE_ERROR);
 
-    CellDataType(int cellType) {
+    CellType(int cellType) {
         this.cellType = cellType;
     }
 

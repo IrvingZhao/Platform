@@ -1,4 +1,4 @@
-package cn.irving.zhao.util.poi.annotation.cell;
+package cn.irving.zhao.util.poi.annotation;
 
 import cn.irving.zhao.util.poi.enums.Direction;
 

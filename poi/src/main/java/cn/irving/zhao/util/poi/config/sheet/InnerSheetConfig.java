@@ -1,52 +1,61 @@
 package cn.irving.zhao.util.poi.config.sheet;
 
-import cn.irving.zhao.util.poi.annotation.sheet.InnerSheet;
+import cn.irving.zhao.util.poi.annotation.InnerSheet;
 
 /**
  * 内嵌表格配置信息
  */
-public class InnerSheetConfig extends SheetConfig {
+public class InnerSheetConfig {
 
     /**
      * @param config 注解配置信息
      */
     public InnerSheetConfig(InnerSheet config) {
-        this.baseRow = config.baseRow();
-        this.baseCol = config.baseCol();
+        this.rowIndex = config.position().rowIndex();
+        this.colIndex = config.position().colIndex();
     }
 
     public InnerSheetConfig(InnerSheet config, SheetConfig sheetConfig) {
         this(config);
-        super.getCells().addAll(sheetConfig.getCells());
-        super.getInnerSheets().addAll(sheetConfig.getInnerSheets());
+        this.sheetConfig = sheetConfig;
     }
 
     /**
-     * @param baseRow 基准行
-     * @param baseCol 基准列
+     * @param rowIndex 基准行
+     * @param colIndex 基准列
      */
-    public InnerSheetConfig(Integer baseRow, Integer baseCol) {
-        this.baseRow = baseRow;
-        this.baseCol = baseCol;
+    public InnerSheetConfig(Integer rowIndex, Integer colIndex) {
+        this.rowIndex = rowIndex;
+        this.colIndex = colIndex;
     }
 
-    private Integer baseRow;//基准行
+    private SheetConfig sheetConfig;// 工作簿配置信息
 
-    private Integer baseCol;//基准列
+    private Integer rowIndex;//基准行
 
-    public Integer getBaseRow() {
-        return baseRow;
+    private Integer colIndex;//基准列
+
+    public Integer getRowIndex() {
+        return rowIndex;
     }
 
-    public void setBaseRow(Integer baseRow) {
-        this.baseRow = baseRow;
+    public void setRowIndex(Integer rowIndex) {
+        this.rowIndex = rowIndex;
     }
 
-    public Integer getBaseCol() {
-        return baseCol;
+    public Integer getColIndex() {
+        return colIndex;
     }
 
-    public void setBaseCol(Integer baseCol) {
-        this.baseCol = baseCol;
+    public void setColIndex(Integer colIndex) {
+        this.colIndex = colIndex;
+    }
+
+    public SheetConfig getSheetConfig() {
+        return sheetConfig;
+    }
+
+    public void setSheetConfig(SheetConfig sheetConfig) {
+        this.sheetConfig = sheetConfig;
     }
 }

@@ -1,10 +1,8 @@
 package cn.irving.zhao.util.poi.config.cell;
 
-import cn.irving.zhao.util.poi.annotation.cell.Cell;
-import cn.irving.zhao.util.poi.annotation.cell.MergedRegion;
-import cn.irving.zhao.util.poi.annotation.cell.Repeatable;
-
-import java.lang.reflect.Field;
+import cn.irving.zhao.util.poi.annotation.Cell;
+import cn.irving.zhao.util.poi.annotation.MergedRegion;
+import cn.irving.zhao.util.poi.annotation.Repeatable;
 
 /**
  * 单元格配置信息
@@ -36,8 +34,8 @@ public class CellConfig {
     }
 
     public CellConfig(Cell config, Repeatable repeatable, MergedRegion mergedRegion) {
-        this.row = config.row();
-        this.col = config.col();
+        this.row = config.position().rowIndex();
+        this.col = config.position().colIndex();
         if (repeatable != null) {
             this.repeatConfig = new CellRepeatConfig(repeatable);
         }

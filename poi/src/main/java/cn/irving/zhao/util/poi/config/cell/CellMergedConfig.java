@@ -1,6 +1,6 @@
 package cn.irving.zhao.util.poi.config.cell;
 
-import cn.irving.zhao.util.poi.annotation.cell.MergedRegion;
+import cn.irving.zhao.util.poi.annotation.MergedRegion;
 
 /**
  * 合并单元格配置
@@ -11,10 +11,10 @@ public class CellMergedConfig {
      * @param mergedRegion 单元格合并注解配置
      */
     public CellMergedConfig(MergedRegion mergedRegion) {
-        this.startRowIndex = mergedRegion.start().row();
-        this.startColIndex = mergedRegion.start().col();
-        this.endRowIndex = mergedRegion.end().row();
-        this.endColIndex = mergedRegion.end().col();
+        this.startRowIndex = mergedRegion.start().rowIndex();
+        this.startColIndex = mergedRegion.start().colIndex();
+        this.endRowIndex = mergedRegion.end().rowIndex();
+        this.endColIndex = mergedRegion.end().colIndex();
     }
 
     /**

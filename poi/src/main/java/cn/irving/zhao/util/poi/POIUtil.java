@@ -1,7 +1,7 @@
 package cn.irving.zhao.util.poi;
 
-import cn.irving.zhao.util.poi.annotation.cell.MergedRegion;
-import cn.irving.zhao.util.poi.annotation.cell.Repeatable;
+import cn.irving.zhao.util.poi.annotation.MergedRegion;
+import cn.irving.zhao.util.poi.annotation.Repeatable;
 import cn.irving.zhao.util.poi.enums.Direction;
 import cn.irving.zhao.util.poi.enums.OutputType;
 import org.apache.poi.ss.usermodel.*;
@@ -26,7 +26,7 @@ public class POIUtil {
             }
             Workbook workbook = outputType.createWorkbook();
 
-            cn.irving.zhao.util.poi.annotation.sheet.Sheet sheetConfig = data.getClass().getAnnotation(cn.irving.zhao.util.poi.annotation.sheet.Sheet.class);
+            cn.irving.zhao.util.poi.annotation.Sheet sheetConfig = data.getClass().getAnnotation(cn.irving.zhao.util.poi.annotation.Sheet.class);
 
             Sheet sheet = getSheet(workbook, sheetConfig.name());
 

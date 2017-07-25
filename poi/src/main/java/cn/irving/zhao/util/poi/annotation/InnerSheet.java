@@ -1,4 +1,4 @@
-package cn.irving.zhao.util.poi.annotation.cell;
+package cn.irving.zhao.util.poi.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,20 +6,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 单元格对应属性配置信息
+ * 内嵌工作簿，在一个工作簿中嵌入另一个工作簿
  */
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD})
-public @interface Cell {
+public @interface InnerSheet {
     /**
-     * 列号
+     * 基准坐标
      */
-    int col();
-
-    /**
-     * 行号
-     */
-    int row();
-
-
+    Position position();
 }

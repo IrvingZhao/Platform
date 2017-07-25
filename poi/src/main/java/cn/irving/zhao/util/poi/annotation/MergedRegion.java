@@ -1,4 +1,6 @@
-package cn.irving.zhao.util.poi.annotation.cell;
+package cn.irving.zhao.util.poi.annotation;
+
+import cn.irving.zhao.util.poi.annotation.Position;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,10 +17,10 @@ public @interface MergedRegion {
     /**
      * 合并单元格开始位置
      */
-    Cell start();
+    Position start();
 
     /**
      * 合并单元格结束位置
      */
-    Cell end();
+    Position end();
 }
