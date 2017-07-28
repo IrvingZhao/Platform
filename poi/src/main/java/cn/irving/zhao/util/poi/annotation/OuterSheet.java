@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * 开始新的工作簿
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD})
 public @interface OuterSheet {
     String name();
 }

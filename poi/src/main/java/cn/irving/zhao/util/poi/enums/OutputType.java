@@ -9,17 +9,17 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  * 输出类型枚举
  */
 public enum OutputType {
-    DOC {
+    XLS {
         @Override
         public Workbook createWorkbook() {
             return new HSSFWorkbook();
         }
-    }, DOCX {
+    }, XLSX {
         @Override
         public Workbook createWorkbook() {
             return new XSSFWorkbook();
         }
-    }, SDOCX {
+    }, SXLSX {
         @Override
         public Workbook createWorkbook() {
             return new SXSSFWorkbook(1000);
