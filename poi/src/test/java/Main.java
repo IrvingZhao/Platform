@@ -1,8 +1,8 @@
 import cn.irving.zhao.util.poi.POIUtil;
 import cn.irving.zhao.util.poi.enums.OutputType;
-import entity.DemoWorkbook;
-import entity.Sheet1;
-import entity.Sheet2;
+//import entity.DemoWorkbook;
+//import entity.Sheet1;
+//import entity.Sheet2;
 
 import java.util.Arrays;
 
@@ -58,31 +58,31 @@ public class Main<T, A> {
 //            }
 //        }
 
-        //TODO 构建数据
-        DemoWorkbook demoWorkbook = new DemoWorkbook();
-        Sheet1 sheet1 = new Sheet1();
-        Sheet2 sheet2 = new Sheet2();
-
-        sheet1.setStr("sheet1-str");
-        sheet1.setListStr1(Arrays.asList("sheet-1-list1-1", "sheet-1-list1-2", "sheet-1-list1-3"));
-        sheet1.setListStr2(Arrays.asList("sheet-1-list2-1", "sheet-1-list2-2", "sheet-1-list2-3"));
-        sheet1.setSheet2(sheet2);
-
-        sheet2.setStr("sheet2-str");
-        sheet2.setListStr1(Arrays.asList("sheet-2-list1-1", "sheet-2-list1-2", "sheet-2-list1-3"));
-        sheet2.setListStr2(Arrays.asList("sheet-2-list2-1", "sheet-2-list2-2", "sheet-2-list2-3"));
-
-        demoWorkbook.setSheet1(sheet1);
-        demoWorkbook.setSheet2(sheet2);
-        long time = System.currentTimeMillis();
-        new POIUtil().writeExcel(demoWorkbook, "E:\\basepath\\a.xlsx", OutputType.XLSX);
-        //TODO 设置输出地址
-        System.out.println("time1：" + (System.currentTimeMillis() - time));
-
-        time = System.currentTimeMillis();
-
-        new POIUtil().writeExcel(demoWorkbook, "E:\\basepath\\b.xlsx", OutputType.XLSX);
-        System.out.println("time2：" + (System.currentTimeMillis() - time));
+//        //TODO 构建数据
+//        DemoWorkbook demoWorkbook = new DemoWorkbook();
+//        Sheet1 sheet1 = new Sheet1();
+//        Sheet2 sheet2 = new Sheet2();
+//
+//        sheet1.setStr("sheet1-str");
+//        sheet1.setListStr1(Arrays.asList("sheet-1-list1-1", "sheet-1-list1-2", "sheet-1-list1-3"));
+//        sheet1.setListStr2(Arrays.asList("sheet-1-list2-1", "sheet-1-list2-2", "sheet-1-list2-3"));
+//        sheet1.setSheet2(sheet2);
+//
+//        sheet2.setStr("sheet2-str");
+//        sheet2.setListStr1(Arrays.asList("sheet-2-list1-1", "sheet-2-list1-2", "sheet-2-list1-3"));
+//        sheet2.setListStr2(Arrays.asList("sheet-2-list2-1", "sheet-2-list2-2", "sheet-2-list2-3"));
+//
+//        demoWorkbook.setSheet1(sheet1);
+//        demoWorkbook.setSheet2(sheet2);
+//        long time = System.currentTimeMillis();
+//        new POIUtil().writeExcel(demoWorkbook, "E:\\basepath\\a.xlsx", OutputType.XLSX);
+//        //TODO 设置输出地址
+//        System.out.println("time1：" + (System.currentTimeMillis() - time));
+//
+//        time = System.currentTimeMillis();
+//
+//        new POIUtil().writeExcel(demoWorkbook, "E:\\basepath\\b.xlsx", OutputType.XLSX);
+//        System.out.println("time2：" + (System.currentTimeMillis() - time));
 
     }
 
