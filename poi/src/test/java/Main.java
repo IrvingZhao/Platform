@@ -1,9 +1,6 @@
 import cn.irving.zhao.util.poi.POIUtil;
-import cn.irving.zhao.util.poi.enums.OutputType;
-//import entity.DemoWorkbook;
-//import entity.Sheet1;
-//import entity.Sheet2;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 
 public class Main<T, A> {
@@ -84,6 +81,66 @@ public class Main<T, A> {
 //        new POIUtil().writeExcel(demoWorkbook, "E:\\basepath\\b.xlsx", OutputType.XLSX);
 //        System.out.println("time2：" + (System.currentTimeMillis() - time));
 
+//        int rowIv = 1;
+//        int colIv = 2;
+//        System.out.println(rowIv + ":" + colIv);
+//        rowIv = colIv = 0;
+//        System.out.println(rowIv + ":" + colIv);
+
+//        System.out.println(Entity1.class.getDeclaredField("s1").getGenericType().getClass());
+//        System.out.println(((ParameterizedType)Entity1.class.getDeclaredField("s2").getGenericType()).getActualTypeArguments()[0].getClass());
+//
+//        if (args.length == 0) {
+//            throw new RuntimeException();
+//        }
+
+
+
+        WorkbookContainer workbookContainer = new WorkbookContainer();
+        Entity1 e1_1 = new Entity1();
+        Entity2 e2_1 = new Entity2();
+        Entity2 e2_2 = new Entity2();
+
+        workbookContainer.setS1("workbook-s1");
+        workbookContainer.setS2(Arrays.asList("workbook-s2-1", "workbook-s2-2", "workbook-s2-3"));
+        workbookContainer.setS3(Arrays.asList("workbook-s3-1", "workbook-s3-2", "workbook-s3-3"));
+
+        e1_1.setS1("entity-1-1-s1");
+        e1_1.setS2(Arrays.asList("entity-1-1-s2-1", "entity-1-1-s2-2", "entity-1-1-s2-3"));
+        e1_1.setS3(Arrays.asList("entity-1-1-s3-1", "entity-1-1-s3-2", "entity-1-1-s3-3"));
+
+        e2_2.setS1("entity-2-2-s1");
+        e2_2.setS2(Arrays.asList("entity-2-2-s2-1", "entity-2-2-s2-2", "entity-2-2-s2-3"));
+        e2_2.setS3(Arrays.asList("entity-2-2-s3-1", "entity-2-2-s3-2", "entity-2-2-s3-3"));
+        e1_1.setEntity2(e2_2);
+
+        Entity2 e1_1_e2_1 = new Entity2();
+        e1_1_e2_1.setS1("e1_1_e2_1-s1");
+        e1_1_e2_1.setS2(Arrays.asList("e1_1_e2_1-s2-1", "e1_1_e2_1-s2-2", "e1_1_e2_1-s2-3"));
+        e1_1_e2_1.setS3(Arrays.asList("e1_1_e2_1-s3-1", "e1_1_e2_1-s3-2", "e1_1_e2_1-s3-3"));
+
+        Entity2 e1_1_e2_2 = new Entity2();
+        e1_1_e2_2.setS1("e1_1_e2_2-s1");
+        e1_1_e2_2.setS2(Arrays.asList("e1_1_e2_2-s2-1", "e1_1_e2_2-s2-2", "e1_1_e2_2-s2-3"));
+        e1_1_e2_2.setS3(Arrays.asList("e1_1_e2_2-s3-1", "e1_1_e2_2-s3-2", "e1_1_e2_2-s3-3"));
+
+        e1_1.setEntity2List(Arrays.asList(e1_1_e2_1, e1_1_e2_2));
+
+        workbookContainer.setEntity1(e1_1);
+
+        e2_1.setS1("entity-2-1-s1");
+        e2_1.setS2(Arrays.asList("entity-2-1-s2-1", "entity-2-1-s2-2", "entity-2-1-s2-3"));
+        e2_1.setS3(Arrays.asList("entity-2-1-s3-1", "entity-2-1-s3-2", "entity-2-1-s3-3"));
+        workbookContainer.setEntity2(e2_1);
+
+        POIUtil poiUtil = new POIUtil();
+
+        long time = System.currentTimeMillis();
+        poiUtil.export(workbookContainer, "E:\\basepath\\a.xlsx");
+        System.out.println(System.currentTimeMillis() - time);
+        time = System.currentTimeMillis();
+        poiUtil.export(workbookContainer, "E:\\basepath\\b.xlsx");
+        System.out.println(System.currentTimeMillis() - time);
     }
 
 //    public List<String> list;
