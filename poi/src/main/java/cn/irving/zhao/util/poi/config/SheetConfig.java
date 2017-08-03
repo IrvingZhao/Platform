@@ -25,6 +25,8 @@ public class SheetConfig {
 
     private Function<Object, Object> dataGetter;
 
+    private SheetNameFormatter sheetNameFormatter;
+
     public static SheetConfig createSheetConfig(Sheet sheet, Function<Object, Object> dataGetter) {
         SheetConfig result = new SheetConfig();
         if (sheet.type() == SheetType.INNER) {
@@ -137,6 +139,17 @@ public class SheetConfig {
         return dataGetter;
     }
 
+    public void setDataGetter(Function<Object, Object> dataGetter) {
+        this.dataGetter = dataGetter;
+    }
+
+    public SheetNameFormatter getSheetNameFormatter() {
+        return sheetNameFormatter;
+    }
+
+    public void setSheetNameFormatter(SheetNameFormatter sheetNameFormatter) {
+        this.sheetNameFormatter = sheetNameFormatter;
+    }
 }
 
 

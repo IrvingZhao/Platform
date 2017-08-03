@@ -1,6 +1,8 @@
 package cn.irving.zhao.util.poi.annonation;
 
 import cn.irving.zhao.util.poi.enums.SheetType;
+import cn.irving.zhao.util.poi.config.DefaultSheetNameFormatter;
+import cn.irving.zhao.util.poi.config.SheetNameFormatter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -25,6 +27,11 @@ public @interface Sheet {
      * @return 默认值："Sheet"
      */
     String name() default "Sheet";
+
+    /**
+     * 工作表名称
+     */
+    Class<? extends SheetNameFormatter> nameFormatter() default DefaultSheetNameFormatter.class;
 
     /**
      * <p>内嵌表格基准行。</p>
