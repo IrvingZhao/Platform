@@ -11,6 +11,7 @@ import cn.irving.zhao.util.poi.inter.IWorkbook;
 import org.apache.commons.collections.map.ReferenceMap;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.function.Function;
 
 /**
@@ -82,10 +83,23 @@ public final class WorkBookConfigFactory {
         Repeatable repeatable = field.getAnnotation(Repeatable.class);//是否重复
 
         SheetConfig sheetConfig = SheetConfig.createSheetConfig(sheet, me.getDataGetter(field));//构建单元表
-        if (repeatable != null) {
+        Class<?> fieldType;
+        if (repeatable == null) {
+            fieldType = field.getType();
+        } else {
             sheetConfig.setRepeatConfig(new RepeatConfig(repeatable));//是否重复
+            if (Iterable.class.isAssignableFrom(field.getType())) {
+                if (ParameterizedType.class.isAssignableFrom(field.getGenericType().getClass())) {
+                    fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                } else {
+                    throw new RuntimeException(field.getName() + "未找到泛型设置");
+                }
+            } else {
+                throw new RuntimeException(field.getType().getName() + "不是一个有效的Iterable对象");
+            }
         }
-        sheetConfig.setSheetCellConfig(getClassSheetConfig(field.getType()));
+        //TODO  entity repeat 时，获取泛型类型
+        sheetConfig.setSheetCellConfig(getClassSheetConfig(fieldType));
         return sheetConfig;
     }
 

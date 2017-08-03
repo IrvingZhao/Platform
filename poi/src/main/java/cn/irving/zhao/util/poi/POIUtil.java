@@ -3,18 +3,23 @@ package cn.irving.zhao.util.poi;
 import cn.irving.zhao.util.poi.config.CellConfig;
 import cn.irving.zhao.util.poi.config.SheetConfig;
 import cn.irving.zhao.util.poi.config.WorkBookConfig;
+import cn.irving.zhao.util.poi.config.WorkBookConfigFactory;
 import cn.irving.zhao.util.poi.config.entity.MergedConfig;
 import cn.irving.zhao.util.poi.config.entity.RepeatConfig;
 import cn.irving.zhao.util.poi.config.entity.SheetCellConfig;
 import cn.irving.zhao.util.poi.enums.Direction;
 import cn.irving.zhao.util.poi.enums.SheetType;
 import cn.irving.zhao.util.poi.enums.WorkbookType;
+import cn.irving.zhao.util.poi.inter.IWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -23,6 +28,29 @@ import java.util.List;
  */
 public class POIUtil {
 
+    public void export(IWorkbook data, String output) {
+        File file = new File(output);
+        FileOutputStream fos = null;
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            fos = new FileOutputStream(file);
+            WorkBookConfig workBookConfig = WorkBookConfigFactory.getWorkbookConfig(data.getClass());
+            Workbook workbook = export(data.getWorkbookType(), workBookConfig, data, null);
+            workbook.write(fos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
     /**
      * 获取WorkBook方法
@@ -36,13 +64,17 @@ public class POIUtil {
         Workbook result = type.getWorkbook(template);
 
         SheetConfig defaultSheetConfig = workBookConfig.getDefaultSheetConfig();
+        //TODO 临时设置DefaultSheetName
         if (defaultSheetConfig != null) {
-            //TODO 写入默认sheet
+            //TODO defaultSheet 的名字需要设置
+            defaultSheetConfig.setName("DefaultSheet");
+            writeSheetData(result, null, defaultSheetConfig, data, 0, 0, 0);
+
         }
         List<SheetConfig> sheetConfigs = workBookConfig.getSheetConfigs();
         if (sheetConfigs != null) {
-            sheetConfigs.forEach((sheetConfig) -> {
-                //TODO 写入单个Sheet
+            sheetConfigs.forEach((itemSheetConfig) -> {
+                writeSheetData(result, null, itemSheetConfig, itemSheetConfig.getData(data), 0, 0, 0);
             });
         }
 
@@ -57,14 +89,14 @@ public class POIUtil {
      * @param data        工作表对应的数据对象
      * @param loopIndex   循环调用时的索引
      */
-    private void writeSheetData(Sheet sheet, SheetConfig sheetConfig, Object data, int rowIv, int colIv, int loopIndex) {
+    private void writeSheetData(Workbook workbook, Sheet sheet, SheetConfig sheetConfig, Object data, int rowIv, int colIv, int loopIndex) {
         Sheet writeDataSheet;
         if (sheetConfig.getSheetType() == SheetType.INNER) {
             writeDataSheet = sheet;
         } else {
             //TODO 加入sheet名称构建器
             //TODO 获得当前循环索引，调用sheet名称构建
-            writeDataSheet = getSheet(sheet.getWorkbook(), sheetConfig.getName());
+            writeDataSheet = getSheet(workbook, sheetConfig.getName());
             // 新创建 sheet 对象时，重置 rowIv 和 colIv
             rowIv = colIv = 0;
         }
@@ -78,16 +110,23 @@ public class POIUtil {
             writeCell(writeDataSheet, item, data, rowIv, colIv);//写入单元格数据
         }
         List<SheetConfig> sheetConfigs = sheetCellConfig.getRefSheetConfigs();//获得关联工作表配置信息
+        if (sheetConfigs == null) {
+            return;
+        }
         for (SheetConfig itemSheetConfig : sheetConfigs) {
             // 在一个单元表 中 的 多个单元表配置信息，每次进入新的单元表配置时，该单元表的 rowIv、colIv 应与最初rowIv、colIv 一致
             int itemSheetRowIv = rowIv;
             int itemSheetColIv = colIv;
+            if (itemSheetConfig.getSheetType() == SheetType.INNER) {//如果为内嵌工作表，追加 baseRow  baseCol
+                itemSheetRowIv += itemSheetConfig.getBaseRow();
+                itemSheetColIv += itemSheetConfig.getBaseCol();
+            }
             //判断是否为循环引入
             RepeatConfig repeatConfig = itemSheetConfig.getRepeatConfig();
             Object itemSheetData = itemSheetConfig.getData(data);
             if (repeatConfig == null) {
                 //写入工作表
-                writeSheetData(writeDataSheet, itemSheetConfig, data, itemSheetConfig.getBaseRow() + itemSheetRowIv, itemSheetConfig.getBaseCol() + itemSheetColIv, 0);
+                writeSheetData(workbook, writeDataSheet, itemSheetConfig, itemSheetData, itemSheetConfig.getBaseRow() + itemSheetRowIv, itemSheetConfig.getBaseCol() + itemSheetColIv, 0);
             } else {
                 Direction direction = repeatConfig.getDirection();
                 int identity = repeatConfig.getIdentity();
@@ -98,7 +137,7 @@ public class POIUtil {
                         if (max > 0 && currentIndex >= max) {//最大循环次数判断
                             break;
                         }
-                        writeSheetData(writeDataSheet, itemSheetConfig, itemSheetDataItem, itemSheetRowIv, itemSheetColIv, currentIndex);
+                        writeSheetData(workbook, writeDataSheet, itemSheetConfig, itemSheetDataItem, itemSheetRowIv, itemSheetColIv, currentIndex);
                         if (direction == Direction.HERIZONTAL) {
                             itemSheetColIv += identity;
                         } else if (direction == Direction.VERTICALLY) {
@@ -127,6 +166,7 @@ public class POIUtil {
     private void writeCell(Sheet sheet, CellConfig cellConfig, Object data, int rowIv, int colIv) {
         RepeatConfig repeatConfig = cellConfig.getRepeatConfig();
         Object cellData = cellConfig.getData(data);
+        //TODO 写入数据时的非空判断
         if (repeatConfig == null) {
             writeCellData(sheet, cellConfig, cellData, rowIv, colIv);
         } else {
