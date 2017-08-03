@@ -1,8 +1,4 @@
-package cn.irving.zhao.util.poi2.enums;
-
-import cn.irving.zhao.util.poi2.annonation.Cell;
-import cn.irving.zhao.util.poi2.annonation.Sheet;
-import cn.irving.zhao.util.poi2.inter.IWorkbook;
+package cn.irving.zhao.util.poi.enums;
 
 /**
  * 工作表类型

@@ -1,7 +1,7 @@
-package cn.irving.zhao.util.poi2.config.entity;
+package cn.irving.zhao.util.poi.config.entity;
 
-import cn.irving.zhao.util.poi2.annonation.Repeatable;
-import cn.irving.zhao.util.poi2.enums.Direction;
+import cn.irving.zhao.util.poi.annonation.Repeatable;
+import cn.irving.zhao.util.poi.enums.Direction;
 
 /**
  * 循环配置信息

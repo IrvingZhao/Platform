@@ -1,9 +1,9 @@
-package cn.irving.zhao.util.poi2.config;
+package cn.irving.zhao.util.poi.config;
 
-import cn.irving.zhao.util.poi2.annonation.Sheet;
-import cn.irving.zhao.util.poi2.config.entity.RepeatConfig;
-import cn.irving.zhao.util.poi2.config.entity.SheetCellConfig;
-import cn.irving.zhao.util.poi2.enums.SheetType;
+import cn.irving.zhao.util.poi.annonation.Sheet;
+import cn.irving.zhao.util.poi.config.entity.RepeatConfig;
+import cn.irving.zhao.util.poi.config.entity.SheetCellConfig;
+import cn.irving.zhao.util.poi.enums.SheetType;
 
 import java.util.function.Function;
 
@@ -23,9 +23,9 @@ public class SheetConfig {
 
     private SheetCellConfig sheetCellConfig;//对应类对象配置信息
 
-    private Function dataGetter;
+    private Function<Object, Object> dataGetter;
 
-    public static SheetConfig createSheetConfig(Sheet sheet,Function dataGetter) {
+    public static SheetConfig createSheetConfig(Sheet sheet, Function<Object, Object> dataGetter) {
         SheetConfig result = new SheetConfig();
         if (sheet.type() == SheetType.INNER) {
             result.baseRow = sheet.baseRow();
@@ -34,23 +34,26 @@ public class SheetConfig {
             result.name = sheet.name();
         }
         result.sheetType = sheet.type();
+        result.dataGetter = dataGetter;
         return result;
     }
 
-    public static SheetConfig createOuterSheet(String name, SheetCellConfig sheetCellConfig,Function dataGetter) {
+    public static SheetConfig createOuterSheet(String name, SheetCellConfig sheetCellConfig, Function<Object, Object> dataGetter) {
         SheetConfig result = new SheetConfig();
         result.sheetType = SheetType.OUTER;
         result.name = name;
         result.sheetCellConfig = sheetCellConfig;
+        result.dataGetter = dataGetter;
         return result;
     }
 
-    public static SheetConfig createInnerSheet(int baseRow, int baseCol, SheetCellConfig sheetCellConfig,Function dataGetter) {
+    public static SheetConfig createInnerSheet(int baseRow, int baseCol, SheetCellConfig sheetCellConfig, Function<Object, Object> dataGetter) {
         SheetConfig result = new SheetConfig();
         result.baseRow = baseRow;
         result.baseCol = baseCol;
         result.sheetCellConfig = sheetCellConfig;
         result.sheetType = SheetType.INNER;
+        result.dataGetter = dataGetter;
         return result;
     }
 
@@ -76,6 +79,10 @@ public class SheetConfig {
         }
         sheetCellConfig.addSheetConfig(sheetConfig);
         return this;
+    }
+
+    public Object getData(Object source) {
+        return dataGetter.apply(source);
     }
 
     public SheetType getSheetType() {
@@ -130,9 +137,6 @@ public class SheetConfig {
         return dataGetter;
     }
 
-    public void setDataGetter(Function dataGetter) {
-        this.dataGetter = dataGetter;
-    }
 }
 
 

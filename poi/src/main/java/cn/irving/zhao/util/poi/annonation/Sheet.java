@@ -1,6 +1,6 @@
-package cn.irving.zhao.util.poi2.annonation;
+package cn.irving.zhao.util.poi.annonation;
 
-import cn.irving.zhao.util.poi2.enums.SheetType;
+import cn.irving.zhao.util.poi.enums.SheetType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

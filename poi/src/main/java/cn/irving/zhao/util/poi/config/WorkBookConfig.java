@@ -1,4 +1,4 @@
-package cn.irving.zhao.util.poi2.config;
+package cn.irving.zhao.util.poi.config;
 
 import java.util.ArrayList;
 import java.util.List;

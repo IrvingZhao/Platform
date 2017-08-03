@@ -1,4 +1,4 @@
-package cn.irving.zhao.util.poi2.config.entity;
+package cn.irving.zhao.util.poi.config.entity;
 
 /**
  * 单元格合并配置信息

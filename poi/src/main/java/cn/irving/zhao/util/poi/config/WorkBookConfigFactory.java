@@ -1,13 +1,13 @@
-package cn.irving.zhao.util.poi2.config;
+package cn.irving.zhao.util.poi.config;
 
-import cn.irving.zhao.util.poi2.annonation.Cell;
-import cn.irving.zhao.util.poi2.annonation.MergedRegion;
-import cn.irving.zhao.util.poi2.annonation.Repeatable;
-import cn.irving.zhao.util.poi2.annonation.Sheet;
-import cn.irving.zhao.util.poi2.config.entity.RepeatConfig;
-import cn.irving.zhao.util.poi2.config.entity.SheetCellConfig;
-import cn.irving.zhao.util.poi2.enums.SheetType;
-import cn.irving.zhao.util.poi2.inter.IWorkbook;
+import cn.irving.zhao.util.poi.annonation.Cell;
+import cn.irving.zhao.util.poi.annonation.MergedRegion;
+import cn.irving.zhao.util.poi.annonation.Repeatable;
+import cn.irving.zhao.util.poi.annonation.Sheet;
+import cn.irving.zhao.util.poi.config.entity.RepeatConfig;
+import cn.irving.zhao.util.poi.config.entity.SheetCellConfig;
+import cn.irving.zhao.util.poi.enums.SheetType;
+import cn.irving.zhao.util.poi.inter.IWorkbook;
 import org.apache.commons.collections.map.ReferenceMap;
 
 import java.lang.reflect.Field;
@@ -64,7 +64,7 @@ public final class WorkBookConfigFactory {
                 result = (WorkBookConfig) tempConfig;
             } else if (SheetCellConfig.class.isInstance(tempConfig)) {
                 result = new WorkBookConfig();
-                result.addDefaultInnerSheetConfig(SheetConfig.createInnerSheet(0, 0, (SheetCellConfig) tempConfig));
+                result.addDefaultInnerSheetConfig(SheetConfig.createInnerSheet(0, 0, (SheetCellConfig) tempConfig, null));
             }
         }
 
@@ -81,11 +81,11 @@ public final class WorkBookConfigFactory {
         Sheet sheet = field.getAnnotation(Sheet.class);//工作表注解
         Repeatable repeatable = field.getAnnotation(Repeatable.class);//是否重复
 
-        SheetConfig sheetConfig = SheetConfig.createSheetConfig(sheet);//构建单元表
+        SheetConfig sheetConfig = SheetConfig.createSheetConfig(sheet, me.getDataGetter(field));//构建单元表
         if (repeatable != null) {
             sheetConfig.setRepeatConfig(new RepeatConfig(repeatable));//是否重复
         }
-        sheetConfig.setSheetCellConfig(getClassSheetConfig(field.getType()));//TODO 设置读取数据方法
+        sheetConfig.setSheetCellConfig(getClassSheetConfig(field.getType()));
         return sheetConfig;
     }
 
@@ -99,7 +99,6 @@ public final class WorkBookConfigFactory {
         Cell cell = field.getAnnotation(Cell.class);//表格坐标
         Repeatable repeatable = field.getAnnotation(Repeatable.class);//是否循环
         MergedRegion mergedRegion = field.getAnnotation(MergedRegion.class);//是否合并单元格
-        //TODO 设置数据读取方法
         return new CellConfig(cell, repeatable, mergedRegion, getDataGetter(field));
     }
 
@@ -127,7 +126,7 @@ public final class WorkBookConfigFactory {
         return result;
     }
 
-    private Function getDataGetter(Field field) {
+    private Function<Object, Object> getDataGetter(Field field) {
         return (source) -> {
             try {
                 field.setAccessible(true);

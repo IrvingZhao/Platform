@@ -1,12 +1,11 @@
-package cn.irving.zhao.util.poi2.config;
+package cn.irving.zhao.util.poi.config;
 
-import cn.irving.zhao.util.poi2.annonation.Cell;
-import cn.irving.zhao.util.poi2.annonation.MergedRegion;
-import cn.irving.zhao.util.poi2.annonation.Repeatable;
-import cn.irving.zhao.util.poi2.config.entity.MergedConfig;
-import cn.irving.zhao.util.poi2.config.entity.RepeatConfig;
+import cn.irving.zhao.util.poi.annonation.Cell;
+import cn.irving.zhao.util.poi.annonation.MergedRegion;
+import cn.irving.zhao.util.poi.annonation.Repeatable;
+import cn.irving.zhao.util.poi.config.entity.MergedConfig;
+import cn.irving.zhao.util.poi.config.entity.RepeatConfig;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**

@@ -11,5 +11,9 @@ public enum Direction {
     /**
      * 纵向
      */
-    VERTICALLY;
+    VERTICALLY,
+    /**
+     * 双向
+     */
+    BOTH;
 }

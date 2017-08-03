@@ -1,7 +1,7 @@
-package cn.irving.zhao.util.poi2.config.entity;
+package cn.irving.zhao.util.poi.config.entity;
 
-import cn.irving.zhao.util.poi2.config.CellConfig;
-import cn.irving.zhao.util.poi2.config.SheetConfig;
+import cn.irving.zhao.util.poi.config.CellConfig;
+import cn.irving.zhao.util.poi.config.SheetConfig;
 
 import java.util.ArrayList;
 import java.util.List;
