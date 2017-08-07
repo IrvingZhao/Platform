@@ -95,7 +95,6 @@ public class Main<T, A> {
 //        }
 
 
-
         WorkbookContainer workbookContainer = new WorkbookContainer();
         Entity1 e1_1 = new Entity1();
         Entity2 e2_1 = new Entity2();
@@ -112,7 +111,7 @@ public class Main<T, A> {
         e2_2.setS1("entity-2-2-s1");
         e2_2.setS2(Arrays.asList("entity-2-2-s2-1", "entity-2-2-s2-2", "entity-2-2-s2-3"));
         e2_2.setS3(Arrays.asList("entity-2-2-s3-1", "entity-2-2-s3-2", "entity-2-2-s3-3"));
-        e1_1.setEntity2(e2_2);
+        e1_1.setEntity2(Arrays.asList(e2_2, e2_2));
 
         Entity2 e1_1_e2_1 = new Entity2();
         e1_1_e2_1.setS1("e1_1_e2_1-s1");
@@ -126,12 +125,18 @@ public class Main<T, A> {
 
         e1_1.setEntity2List(Arrays.asList(e1_1_e2_1, e1_1_e2_2));
 
+        Entity3 e1_1_e3_1 = new Entity3(1, 2, "测试1");
+        Entity3 e1_1_e3_2 = new Entity3(2, 3, "测试2");
+        Entity3 e1_1_e3_3 = new Entity3(3, 4, "测试3");
+
+        e1_1.setEntity3s(Arrays.asList(e1_1_e3_1, e1_1_e3_2, e1_1_e3_3));
         workbookContainer.setEntity1(e1_1);
 
         e2_1.setS1("entity-2-1-s1");
         e2_1.setS2(Arrays.asList("entity-2-1-s2-1", "entity-2-1-s2-2", "entity-2-1-s2-3"));
         e2_1.setS3(Arrays.asList("entity-2-1-s3-1", "entity-2-1-s3-2", "entity-2-1-s3-3"));
         workbookContainer.setEntity2(e2_1);
+
 
         POIUtil poiUtil = new POIUtil();
 

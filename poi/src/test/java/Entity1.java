@@ -4,6 +4,7 @@ import cn.irving.zhao.util.poi.annonation.Repeatable;
 import cn.irving.zhao.util.poi.annonation.Sheet;
 import cn.irving.zhao.util.poi.enums.Direction;
 import cn.irving.zhao.util.poi.enums.SheetType;
+import demo.DemoNameFormatter;
 
 import java.util.List;
 
@@ -28,8 +29,13 @@ public class Entity1 {
     @Repeatable(direction = Direction.VERTICALLY, identity = 8)
     private List<Entity2> entity2List;
 
-    @Sheet(type = SheetType.OUTER, name = "引入外部")
-    private Entity2 entity2;
+    @Sheet(type = SheetType.OUTER, name = "引入外部", nameFormatter = DemoNameFormatter.class)
+    @Repeatable
+    private List<Entity2> entity2;
+
+    @Sheet(type = SheetType.INNER, baseRow = 20, baseCol = 0)
+    @Repeatable(direction = Direction.VERTICALLY, identity = 2)
+    private List<Entity3> entity3s;
 
 
     public String getS1() {
@@ -64,11 +70,19 @@ public class Entity1 {
         this.entity2List = entity2List;
     }
 
-    public Entity2 getEntity2() {
+    public List<Entity2> getEntity2() {
         return entity2;
     }
 
-    public void setEntity2(Entity2 entity2) {
+    public void setEntity2(List<Entity2> entity2) {
         this.entity2 = entity2;
+    }
+
+    public List<Entity3> getEntity3s() {
+        return entity3s;
+    }
+
+    public void setEntity3s(List<Entity3> entity3s) {
+        this.entity3s = entity3s;
     }
 }
