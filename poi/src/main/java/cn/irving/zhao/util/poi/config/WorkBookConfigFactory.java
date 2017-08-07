@@ -1,11 +1,6 @@
 package cn.irving.zhao.util.poi.config;
 
-import cn.irving.zhao.util.poi.annonation.Cell;
-import cn.irving.zhao.util.poi.annonation.MergedRegion;
-import cn.irving.zhao.util.poi.annonation.Repeatable;
-import cn.irving.zhao.util.poi.annonation.Sheet;
-import cn.irving.zhao.util.poi.config.entity.RepeatConfig;
-import cn.irving.zhao.util.poi.config.entity.SheetCellConfig;
+import cn.irving.zhao.util.poi.annonation.*;
 import cn.irving.zhao.util.poi.enums.SheetType;
 import cn.irving.zhao.util.poi.inter.IWorkbook;
 import org.apache.commons.collections.map.ReferenceMap;
@@ -98,7 +93,6 @@ public final class WorkBookConfigFactory {
                 throw new RuntimeException(field.getType().getName() + "不是一个有效的Iterable对象");
             }
         }
-        //TODO  entity repeat 时，获取泛型类型
         sheetConfig.setSheetCellConfig(getClassSheetConfig(fieldType));
         return sheetConfig;
     }
@@ -113,7 +107,8 @@ public final class WorkBookConfigFactory {
         Cell cell = field.getAnnotation(Cell.class);//表格坐标
         Repeatable repeatable = field.getAnnotation(Repeatable.class);//是否循环
         MergedRegion mergedRegion = field.getAnnotation(MergedRegion.class);//是否合并单元格
-        return new CellConfig(cell, repeatable, mergedRegion, getDataGetter(field));
+        Formatter formatter = field.getAnnotation(Formatter.class);
+        return new CellConfig(cell, repeatable, mergedRegion, formatter, getDataGetter(field));
     }
 
     /**

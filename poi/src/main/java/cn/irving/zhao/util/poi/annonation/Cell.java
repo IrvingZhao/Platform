@@ -1,5 +1,7 @@
 package cn.irving.zhao.util.poi.annonation;
 
+import cn.irving.zhao.util.poi.enums.CellDataType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -20,4 +22,9 @@ public @interface Cell {
      * 列坐标
      */
     int colIndex();
+
+    /**
+     * 单元格数据类型，默认为字符串
+     */
+    CellDataType dataType() default CellDataType.AUTO;
 }

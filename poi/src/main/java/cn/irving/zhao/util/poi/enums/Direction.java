@@ -15,5 +15,5 @@ public enum Direction {
     /**
      * 双向
      */
-    BOTH;
+    BOTH
 }

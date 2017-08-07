@@ -17,12 +17,12 @@ public @interface Repeatable {
     /**
      * 循环方向
      */
-    Direction direction();
+    Direction direction() default Direction.VERTICALLY;
 
     /**
      * 每次递增数值
      */
-    int identity();
+    int identity() default 1;
 
     /**
      * 循环最大次数

@@ -1,9 +1,9 @@
 package cn.irving.zhao.util.poi.config;
 
 import cn.irving.zhao.util.poi.annonation.Sheet;
-import cn.irving.zhao.util.poi.config.entity.RepeatConfig;
-import cn.irving.zhao.util.poi.config.entity.SheetCellConfig;
 import cn.irving.zhao.util.poi.enums.SheetType;
+import cn.irving.zhao.util.poi.formatter.SheetNameFormatter;
+import cn.irving.zhao.util.poi.formatter.FormatterFactory;
 
 import java.util.function.Function;
 
@@ -11,6 +11,8 @@ import java.util.function.Function;
  * 工作表配置信息
  */
 public class SheetConfig {
+
+    private static FormatterFactory<SheetNameFormatter> factory = FormatterFactory.getFormatterFactory(SheetNameFormatter.class);
 
     private SheetType sheetType;//工作表类型
 
@@ -37,6 +39,9 @@ public class SheetConfig {
         }
         result.sheetType = sheet.type();
         result.dataGetter = dataGetter;
+        if (sheet.nameFormatter() != SheetNameFormatter.class) {
+            result.sheetNameFormatter = factory.getFormatter(sheet.nameFormatter());
+        }
         return result;
     }
 
