@@ -21,35 +21,73 @@ import java.util.List;
  */
 public class POIUtil {
 
+    public void export(IWorkbook data, OutputStream outputStream, String template) throws ExportException {
+        try {
+            export(data, outputStream, getTemplateStreamByPath(template));
+        } catch (IOException e) {
+            throw new ExportException("流异常", e);
+        }
+    }
+
+    /**
+     * 导出excel
+     *
+     * @param data     数据
+     * @param output   输出位置，物理磁盘路径
+     * @param template excel模板文件流
+     */
+    public void export(IWorkbook data, String output, InputStream template) throws ExportException {
+        try {
+            File file = new File(output);
+            if (!file.exists()) {
+                if (!file.createNewFile()) {
+                    throw new ExportException("文件：" + output + "创建失败");
+                }
+            }
+            FileOutputStream outputStream = new FileOutputStream(file);
+            export(data, outputStream, template);
+        } catch (IOException e) {
+            throw new ExportException("流异常", e);
+        }
+    }
+
     /**
      * excel导出
      *
      * @param data     数据
      * @param output   输出磁盘位置，物理磁盘位置
-     * @param template 模板位置
+     * @param template 模板位置，磁盘物理路径或classpath路径，优先查找磁盘物理路径
      */
     public void export(IWorkbook data, String output, String template) throws ExportException {
         try {
             File file = new File(output);
             if (!file.exists()) {
-                file.createNewFile();
-            }
-            FileOutputStream outputStream = new FileOutputStream(file);
-
-            InputStream templateStream = null;
-            if (template != null && !"".equals(template)) {
-                File templateFile = new File(template);// 检查文件，如果物理磁盘中存在，使用物理磁盘中的文件，不存在，使用class获得resource
-                if (templateFile.exists()) {
-                    templateStream = new FileInputStream(file);
-                } else {
-                    templateStream = POIUtil.class.getResourceAsStream(template);
+                if (!file.createNewFile()) {
+                    throw new ExportException("文件：" + output + "创建失败");
                 }
             }
-            export(data, outputStream, templateStream);
+            FileOutputStream outputStream = new FileOutputStream(file);
+            export(data, outputStream, getTemplateStreamByPath(template));
         } catch (IOException e) {
             throw new ExportException("流异常", e);
         }
 
+    }
+
+    /**
+     * 根据路径创建查找文件
+     */
+    private InputStream getTemplateStreamByPath(String path) throws FileNotFoundException {
+        InputStream templateStream = null;
+        if (path != null && !"".equals(path)) {
+            File templateFile = new File(path);// 检查文件，如果物理磁盘中存在，使用物理磁盘中的文件，不存在，使用class获得resource
+            if (templateFile.exists()) {
+                templateStream = new FileInputStream(templateFile);
+            } else {
+                templateStream = POIUtil.class.getResourceAsStream(path);
+            }
+        }
+        return templateStream;
     }
 
 
@@ -65,6 +103,7 @@ public class POIUtil {
             WorkBookConfig workBookConfig = WorkBookConfigFactory.getWorkbookConfig(data.getClass());
             Workbook workbook = export(data.getWorkbookType(), workBookConfig, data, template);
             workbook.write(output);
+            output.flush();
         } catch (IOException e) {
             throw new ExportException("流异常", e);
         }

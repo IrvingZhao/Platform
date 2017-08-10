@@ -14,7 +14,7 @@ public class SheetConfig {
 
     private static FormatterFactory<SheetNameFormatter> factory = FormatterFactory.getFormatterFactory(SheetNameFormatter.class);
 
-    private SheetType sheetType;//工作表类型
+    private SheetType sheetType = SheetType.OUTER;//工作表类型
 
     private String name;//工作表名称
 
