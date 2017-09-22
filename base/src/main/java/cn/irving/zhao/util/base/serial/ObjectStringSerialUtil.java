@@ -23,17 +23,15 @@ import java.util.Map;
  * @since 1.0
  */
 public final class ObjectStringSerialUtil {
-    private ObjectStringSerialUtil() {
-    }
 
     private final static ObjectStringSerialUtil me = new ObjectStringSerialUtil();
-    private final static ObjectMapper OBJECT_MAPPER;
-    private final static XmlMapper XML_MAPPER;
-    private final static Logger logger;
-    private final static SimpleFilterProvider JSON_FILTER_PROVIDER;
-    private final static SimpleFilterProvider XML_FILTER_PROVIDER;
+    private final ObjectMapper OBJECT_MAPPER;
+    private final XmlMapper XML_MAPPER;
+    private final Logger logger;
+    private final SimpleFilterProvider JSON_FILTER_PROVIDER;
+    private final SimpleFilterProvider XML_FILTER_PROVIDER;
 
-    static {
+    private ObjectStringSerialUtil() {
         OBJECT_MAPPER = new ObjectMapper();
         JSON_FILTER_PROVIDER = new SimpleFilterProvider();
 
@@ -56,26 +54,26 @@ public final class ObjectStringSerialUtil {
 
     public enum SerialType {
         JSON {
-            protected ObjectMapper getMapper() {
-                return OBJECT_MAPPER;
+            protected ObjectMapper getMapper(ObjectStringSerialUtil serialUtil) {
+                return serialUtil.OBJECT_MAPPER;
             }
 
-            protected SimpleFilterProvider getFilterProvider() {
-                return JSON_FILTER_PROVIDER;
+            protected SimpleFilterProvider getFilterProvider(ObjectStringSerialUtil serialUtil) {
+                return serialUtil.JSON_FILTER_PROVIDER;
             }
         }, XML {
-            protected ObjectMapper getMapper() {
-                return XML_MAPPER;
+            protected ObjectMapper getMapper(ObjectStringSerialUtil serialUtil) {
+                return serialUtil.XML_MAPPER;
             }
 
-            protected SimpleFilterProvider getFilterProvider() {
-                return XML_FILTER_PROVIDER;
+            protected SimpleFilterProvider getFilterProvider(ObjectStringSerialUtil serialUtil) {
+                return serialUtil.XML_FILTER_PROVIDER;
             }
         };
 
-        protected abstract ObjectMapper getMapper();
+        protected abstract ObjectMapper getMapper(ObjectStringSerialUtil serialUtil);
 
-        protected abstract SimpleFilterProvider getFilterProvider();
+        protected abstract SimpleFilterProvider getFilterProvider(ObjectStringSerialUtil serialUtil);
     }
 
     public enum PropertyFilterType {
@@ -84,6 +82,10 @@ public final class ObjectStringSerialUtil {
 
     public static ObjectStringSerialUtil getSerialUtil() {
         return me;
+    }
+
+    public static ObjectStringSerialUtil newInstance() {
+        return new ObjectStringSerialUtil();
     }
 
 
@@ -97,14 +99,24 @@ public final class ObjectStringSerialUtil {
      */
     public void addFilter(String filterId, SerialType type, PropertyFilterType filterType, String... props) {
         if (filterType == PropertyFilterType.EXCEPT) {
-            type.getFilterProvider().addFilter(filterId, SimpleBeanPropertyFilter.serializeAllExcept(props));
+            type.getFilterProvider(this).addFilter(filterId, SimpleBeanPropertyFilter.serializeAllExcept(props));
         } else if (filterType == PropertyFilterType.INCLUDE) {
-            type.getFilterProvider().addFilter(filterId, SimpleBeanPropertyFilter.filterOutAllExcept(props));
+            type.getFilterProvider(this).addFilter(filterId, SimpleBeanPropertyFilter.filterOutAllExcept(props));
         }
     }
 
     public void addFilter(String filterId, SerialType type, PropertyFilter filter) {
-        type.getFilterProvider().addFilter(filterId, filter);
+        type.getFilterProvider(this).addFilter(filterId, filter);
+    }
+
+    public void removeFilter(String filterId, SerialType type) {
+        type.getFilterProvider(this).removeFilter(filterId);
+    }
+
+    public void removeFilter(String filterId) {
+        for (int i = 0; i < SerialType.values().length; i++) {
+            removeFilter(filterId, SerialType.values()[i]);
+        }
     }
 
     /**
@@ -131,7 +143,7 @@ public final class ObjectStringSerialUtil {
      */
     public String serial(Object value, SerialType formatType) {
         try {
-            return formatType.getMapper().writeValueAsString(value);
+            return formatType.getMapper(this).writeValueAsString(value);
         } catch (JsonProcessingException e) {
             logger.error("序列化失败", e);
             throw new RuntimeException(e);
@@ -147,7 +159,7 @@ public final class ObjectStringSerialUtil {
      */
     public void serial(OutputStream outputStream, Object value, SerialType formatType) {
         try {
-            formatType.getMapper().writeValue(outputStream, value);
+            formatType.getMapper(this).writeValue(outputStream, value);
         } catch (IOException e) {
             logger.error("序列化失败", e);
             throw new RuntimeException(e);
@@ -163,7 +175,7 @@ public final class ObjectStringSerialUtil {
      */
     public void serial(Writer writer, Object value, SerialType formatType) {
         try {
-            formatType.getMapper().writeValue(writer, value);
+            formatType.getMapper(this).writeValue(writer, value);
         } catch (IOException e) {
             logger.error("序列化失败", e);
             throw new RuntimeException(e);
@@ -225,7 +237,7 @@ public final class ObjectStringSerialUtil {
      */
     public <T> T parse(String content, Class<T> type, SerialType formatType) {
         try {
-            return formatType.getMapper().readValue(content, type);
+            return formatType.getMapper(this).readValue(content, type);
         } catch (IOException e) {
             logger.error("序列化失败", e);
             throw new RuntimeException(e);
@@ -243,7 +255,7 @@ public final class ObjectStringSerialUtil {
      */
     public <T> T parse(Reader content, Class<T> type, SerialType formatType) {
         try {
-            return formatType.getMapper().readValue(content, type);
+            return formatType.getMapper(this).readValue(content, type);
         } catch (IOException e) {
             logger.error("序列化失败", e);
             throw new RuntimeException(e);
@@ -261,7 +273,7 @@ public final class ObjectStringSerialUtil {
      */
     public <T> T parse(InputStream content, Class<T> type, SerialType formatType) {
         try {
-            return formatType.getMapper().readValue(content, type);
+            return formatType.getMapper(this).readValue(content, type);
         } catch (IOException e) {
             logger.error("序列化失败", e);
             throw new RuntimeException(e);
@@ -279,7 +291,7 @@ public final class ObjectStringSerialUtil {
      */
     public <T> T parse(URL content, Class<T> type, SerialType formatType) {
         try {
-            return formatType.getMapper().readValue(content, type);
+            return formatType.getMapper(this).readValue(content, type);
         } catch (IOException e) {
             logger.error("序列化失败", e);
             throw new RuntimeException(e);

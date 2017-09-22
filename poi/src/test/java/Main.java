@@ -55,7 +55,6 @@ public class Main<T, A> {
 //            }
 //        }
 
-//        //TODO 构建数据
 //        DemoWorkbook demoWorkbook = new DemoWorkbook();
 //        Sheet1 sheet1 = new Sheet1();
 //        Sheet2 sheet2 = new Sheet2();
@@ -73,7 +72,6 @@ public class Main<T, A> {
 //        demoWorkbook.setSheet2(sheet2);
 //        long time = System.currentTimeMillis();
 //        new POIUtil().writeExcel(demoWorkbook, "E:\\basepath\\a.xlsx", OutputType.XLSX);
-//        //TODO 设置输出地址
 //        System.out.println("time1：" + (System.currentTimeMillis() - time));
 //
 //        time = System.currentTimeMillis();

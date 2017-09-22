@@ -41,5 +41,14 @@
             <version>4.12</version>
         </dependency>
     </dependencies>
+	
+	
+	<distributionManagement>
+		<repository>
+			<id>xingdi</id>
+			<name>releases</name>
+			<url>http://192.168.9.188/nexus/repository/xingdi-primary/</url>
+		</repository>
+	</distributionManagement>
 
 </project>

@@ -102,7 +102,7 @@ public class HttpClient {
                 }
             }
             request = generateRequest(message.getRequestUrl(), message.getRequestMethod());
-            message.getRequestHead().entrySet().forEach(item -> request.addHeader(item.getKey(), item.getValue()));
+            message.getRequestHead().forEach(request::addHeader);
             if (entity != null) {
                 request.setEntity(entity);
             }
@@ -187,7 +187,7 @@ public class HttpClient {
             result.setURI(URI.create(url));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("无法创建["+method.name()+"]的请求方法", e);
+            throw new RuntimeException("无法创建[" + method.name() + "]的请求方法", e);
         }
     }
 
