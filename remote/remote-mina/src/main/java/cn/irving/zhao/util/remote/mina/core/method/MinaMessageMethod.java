@@ -1,14 +1,18 @@
 package cn.irving.zhao.util.remote.mina.core.method;
 
-import cn.irving.zhao.util.remote.mina.core.message.MinaMessageData;
-import org.apache.mina.core.session.IoSession;
-
 /**
  * mina 消息方法
  */
-@FunctionalInterface
-public interface MinaMessageMethod<T extends MinaMessageData, R extends MinaMessageData> {
+public interface MinaMessageMethod<T, R> {
 
-    R execute(T data, IoSession ioSession);
+    /**
+     * 执行方法
+     */
+    R execute(T data);
+
+    /**
+     * 获得数据类型，作为反序列化对象使用
+     */
+    Class<T> getDataType();
 
 }

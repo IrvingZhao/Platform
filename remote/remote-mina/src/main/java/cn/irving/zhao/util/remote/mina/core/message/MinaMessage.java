@@ -14,13 +14,11 @@ public final class MinaMessage {
         this.messageId = messageId;
     }
 
-    private MinaMessage(String method, Boolean needSign, MinaMessageData data) {
+    private MinaMessage(String clientId, String method, String data) {
         this.messageId = UUID.randomUUID().toString();
-        this.clientId = data.getClientId();
+        this.clientId = clientId;
         this.method = method;
-        this.needSign = needSign;
         this.data = data;
-        this.dataType = data.getClass().getName();
     }
 
     private final String messageId;
@@ -29,31 +27,33 @@ public final class MinaMessage {
 
     private String method;//执行方法
 
-    private Boolean needSign;//是否签名
-
-    private String dataType;//数据class type
-
-    @JsonIgnore
-    private MinaMessageData data;//数据对象
+    private String data;//交互数据
 
     private String sign;//签名
 
     private Long sendDate;//发送时间
 
-    private String transData;//交互数据
-
     /**
      * 构建mina消息
      *
-     * @param needSign 是否签名
+     * @param clientId 客户端id
+     * @param method   执行方法
      * @param data     消息数据
      */
-    public static MinaMessage createMinaMessage(Boolean needSign, MinaMessageData data) {
-        return new MinaMessage(data.getMethod(), needSign, data);
+    public static MinaMessage createMinaMessage(String clientId, String method, String data) {
+        return new MinaMessage(clientId, method, data);
     }
 
     public String getMessageId() {
         return messageId;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 
     public String getMethod() {
@@ -64,72 +64,27 @@ public final class MinaMessage {
         this.method = method;
     }
 
-    public Boolean getNeedSign() {
-        return needSign;
-    }
-
-    public void setNeedSign(Boolean needSign) {
-        this.needSign = needSign;
-    }
-
-    public MinaMessageData getData() {
+    public String getData() {
         return data;
     }
 
-    public void setData(MinaMessageData data) {
+    public void setData(String data) {
         this.data = data;
-        this.dataType = data.getClass().getName();
     }
 
-    //=================================================== Jackson 属性注入使用
-
-    @JsonGetter
-    String getDataType() {
-        return dataType;
-    }
-
-    @JsonSetter
-    void setDataType(String dataType) {
-        this.dataType = dataType;
-    }
-
-    @JsonGetter
-    String getSign() {
+    public String getSign() {
         return sign;
     }
 
-    @JsonSetter
-    void setSign(String sign) {
+    public void setSign(String sign) {
         this.sign = sign;
     }
 
-    @JsonGetter
-    Long getSendDate() {
+    public Long getSendDate() {
         return sendDate;
     }
 
-    @JsonSetter
-    void setSendDate(Long sendDate) {
+    public void setSendDate(Long sendDate) {
         this.sendDate = sendDate;
-    }
-
-    @JsonGetter
-    String getTransData() {
-        return transData;
-    }
-
-    @JsonSetter
-    void setTransData(String transData) {
-        this.transData = transData;
-    }
-
-    @JsonGetter
-    String getClientId() {
-        return clientId;
-    }
-
-    @JsonSetter
-    void setClientId(String clientId) {
-        this.clientId = clientId;
     }
 }

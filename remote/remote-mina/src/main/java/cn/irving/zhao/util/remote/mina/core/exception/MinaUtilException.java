@@ -1,5 +1,8 @@
 package cn.irving.zhao.util.remote.mina.core.exception;
 
+/**
+ * mina 异常
+ */
 public class MinaUtilException extends RuntimeException {
 
     public MinaUtilException() {

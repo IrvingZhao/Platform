@@ -1,14 +1,19 @@
 package cn.irving.zhao.util.remote.mina.core.method;
 
-import cn.irving.zhao.util.remote.mina.core.message.MinaMessageData;
 
 /**
  * mina 消息执行器 工厂
  */
-public interface MinaMessageMethodFactory {
+public interface MinaMessageMethodFactory<T, R> {
 
-    MinaMessageMethod<MinaMessageData, MinaMessageData> getMethod(String methodName);
+    /**
+     * 根据方法名获得方法执行器
+     */
+    MinaMessageMethod<T, R> getMethod(String methodName);
 
-    void registerMethod(String methodName, MinaMessageMethod<MinaMessageData, MinaMessageData> method);
+    /**
+     * 注册方法执行器
+     */
+    void registerMethod(String methodName, MinaMessageMethod<T, R> method);
 
 }
