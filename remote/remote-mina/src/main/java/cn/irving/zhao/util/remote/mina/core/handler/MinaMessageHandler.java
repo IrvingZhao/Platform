@@ -11,6 +11,8 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.UUID;
+
 /**
  * 消息处理器
  */
@@ -29,20 +31,29 @@ public class MinaMessageHandler extends IoHandlerAdapter {
 
     @Override
     public void messageReceived(IoSession session, Object message) throws Exception {
-
         if (MinaMessage.class.isInstance(message)) {
-            logger.info("mina-executeMethod-start");
             MinaMessage minaMessage = (MinaMessage) message;
-            MinaMessageMethod method = methodFactory.getMethod(minaMessage.getMethod());
-            //TODO 变更 method 为null 时候的信息
-            if (method == null) {
-                throw new MinaUtilException("未找到[" + minaMessage.getMethod() + "]的方法");
+            try {
+                logger.info("mina-executeMethod-start");
+                MinaMessageMethod method = methodFactory.getMethod(minaMessage.getMethod());
+                if (method == null) {
+                    throw new MinaUtilException("未找到[" + minaMessage.getMethod() + "]的方法");
+                }
+                Class<?> paramType = method.getDataType();
+                Object param = serialExecutor.parse(minaMessage.getData(), paramType);
+                Object result = method.execute(param);
+                logger.info("mina-executeMethod-end");
+                if (minaMessage.getPairedId() != null && !minaMessage.getPairedId().trim().isEmpty()) {// 在请求消息中的消息对id不为空的情况下执行响应
+                    String jsonData = serialExecutor.serial(result);
+                    session.write(minaMessage.generateResultMessage(jsonData));
+                }
+            } catch (Exception e) {
+                Long exceptionId = System.currentTimeMillis();
+                logger.error("exception-{}-{}", exceptionId, e.getMessage(), e);
+                if (minaMessage.getPairedId() != null && !minaMessage.getPairedId().trim().isEmpty()) {// 在请求消息中的消息对id不为空的情况下，返回异常信息
+                    session.write(minaMessage.generateErrorMessage(exceptionId, e.toString()));
+                }
             }
-            Class<?> paramType = method.getDataType();
-            Object param = serialExecutor.parse(minaMessage.getData(), paramType);
-            Object result = method.execute(param);
-            logger.info("mina-executeMethod-end");
-            //TODO 在成对消息中，写入返回值
         }
 
     }

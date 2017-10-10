@@ -1,5 +1,6 @@
 package cn.irving.zhao.util.remote.mina.core.message;
 
+import cn.irving.zhao.util.remote.mina.core.BaseMinaOperator;
 import com.fasterxml.jackson.annotation.*;
 
 import java.util.UUID;
@@ -33,6 +34,12 @@ public final class MinaMessage {
 
     private Long sendDate;//发送时间
 
+    private String pairedId;//消息对id
+
+    private Long errorId;//异常id
+
+    private String errorMessage;//异常信息
+
     /**
      * 构建mina消息
      *
@@ -42,6 +49,26 @@ public final class MinaMessage {
      */
     public static MinaMessage createMinaMessage(String clientId, String method, String data) {
         return new MinaMessage(clientId, method, data);
+    }
+
+    public static MinaMessage createPairedMinaMessage(String clientId, String method, String data) {
+        MinaMessage result = new MinaMessage(clientId, method, data);
+        result.pairedId = UUID.randomUUID().toString();
+        return result;
+    }
+
+    public MinaMessage generateResultMessage(String data) {
+        MinaMessage result = new MinaMessage(this.clientId, BaseMinaOperator.MESSAGE_PAIRED_RESULT_METHOD_NAME, data);
+        result.pairedId = this.pairedId;
+        return result;
+    }
+
+    public MinaMessage generateErrorMessage(Long errorId, String message) {
+        MinaMessage result = new MinaMessage(this.clientId, BaseMinaOperator.MESSAGE_PAIRED_RESULT_METHOD_NAME, data);
+        result.pairedId = this.pairedId;
+        result.errorId = errorId;
+        result.errorMessage = message;
+        return result;
     }
 
     public String getMessageId() {
@@ -86,5 +113,29 @@ public final class MinaMessage {
 
     public void setSendDate(Long sendDate) {
         this.sendDate = sendDate;
+    }
+
+    public String getPairedId() {
+        return pairedId;
+    }
+
+    public void setPairedId(String pairedId) {
+        this.pairedId = pairedId;
+    }
+
+    public Long getErrorId() {
+        return errorId;
+    }
+
+    public void setErrorId(Long errorId) {
+        this.errorId = errorId;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

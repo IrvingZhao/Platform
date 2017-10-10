@@ -2,14 +2,13 @@ package cn.irving.zhao.util.remote.mina.server;
 
 import cn.irving.zhao.util.remote.mina.core.BaseMinaOperator;
 import cn.irving.zhao.util.remote.mina.core.exception.MinaUtilException;
-import cn.irving.zhao.util.remote.mina.core.message.MinaMessageDataWrapper;
-import cn.irving.zhao.util.remote.mina.core.message.MinaMessageData;
+import cn.irving.zhao.util.remote.mina.core.message.MinaMessage;
+import cn.irving.zhao.util.remote.mina.core.paired.PairedMessageLock;
 import cn.irving.zhao.util.remote.mina.server.session.MinaClientHolder;
 import cn.irving.zhao.util.remote.mina.server.session.MinaClientModel;
 import cn.irving.zhao.util.remote.mina.server.session.MinaServerClientFilter;
 import org.apache.mina.core.filterchain.IoFilter;
 import org.apache.mina.core.service.IoAcceptor;
-import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.service.IoService;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 
@@ -83,14 +82,14 @@ public class MinaServer extends BaseMinaOperator {
             logger.info("mina-server-addCustomFilter");
             filters.forEach(this.service.getFilterChain()::addLast);
         }
-        logger.info("mina-server-parentInit");
-        super.init();
         if (super.serialExecutor != null) {
             if (enableClientValid) {
                 logger.info("mina-server-addClientValid");
-                this.service.getFilterChain().addBefore(MESSAGE_WRAPPER_FILTER_NAME, CLIENT_SIGN_FILTER_NAME, new MinaServerClientFilter(clientHolder, clientExpireTime));
+                this.service.getFilterChain().addLast(CLIENT_SIGN_FILTER_NAME, new MinaServerClientFilter(clientHolder, clientExpireTime));
             }
         }
+        logger.info("mina-server-parentInit");
+        super.init();
         logger.info("mina-server-initiated");
     }
 
@@ -127,18 +126,34 @@ public class MinaServer extends BaseMinaOperator {
      * @param data     数据
      */
     public void sendMessage(String clientId, String method, Object data) {
-        this.sendMessage(new MinaMessageDataWrapper(clientId, method, data));
+        String jsonData = serialExecutor.serial(data);
+        this.sendMessage(MinaMessage.createMinaMessage(clientId, method, jsonData));
     }
 
     /**
-     * 给客户端发送消息
+     * 发送成对消息
      *
-     * @param message 消息对象
+     * @param clientId   目标客户端id
+     * @param method     消息接收方执行方法
+     * @param data       数据对象
+     * @param resultType 返回值类型
      */
-    public void sendMessage(MinaMessageData message) {
-        MinaClientModel client = clientHolder.getClient(message.getClientId());
-        client.sendMessage(message);
+    public <T> T sendPairedMessage(String clientId, String method, Object data, Class<T> resultType) {
+        String jsonData = serialExecutor.serial(data);
+        return this.sendPairedMessage(MinaMessage.createPairedMinaMessage(clientId, method, jsonData), resultType);
     }
+
+    /**
+     * 发送消息
+     *
+     * @param minaMessage 消息对象
+     */
+    protected void sendMessage(MinaMessage minaMessage) {
+        MinaClientModel client = clientHolder.getClient(minaMessage.getClientId());
+        minaMessage.setSendDate(System.currentTimeMillis());
+        client.sendMessage(minaMessage);
+    }
+
 
     public String getHost() {
         return host;

@@ -1,8 +1,8 @@
 package cn.irving.zhao.util.remote.mina.client;
 
 import cn.irving.zhao.util.remote.mina.core.BaseMinaOperator;
-import cn.irving.zhao.util.remote.mina.core.message.MinaMessageData;
-import cn.irving.zhao.util.remote.mina.core.message.MinaMessageDataWrapper;
+import cn.irving.zhao.util.remote.mina.core.message.MinaMessage;
+import cn.irving.zhao.util.remote.mina.core.paired.PairedMessageLock;
 import org.apache.mina.core.filterchain.IoFilter;
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoService;
@@ -13,7 +13,6 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 
 /**
@@ -109,8 +108,7 @@ public class MinaClient extends BaseMinaOperator {
             future.awaitUninterruptibly();
             this.session = future.getSession();
             if (autoRegisterClient) {
-                //TODO 注册客户端
-                this.sendMessage(CLIENT_AUTH_METHOD_NAME, "");
+                this.sendMessage(CLIENT_AUTH_METHOD_NAME, "");//注册客户端
             }
         } catch (UnknownHostException e) {
             e.printStackTrace();
@@ -124,18 +122,31 @@ public class MinaClient extends BaseMinaOperator {
      * @param data   传输数据
      */
     public void sendMessage(String method, Object data) {
-        this.sendMessage(new MinaMessageDataWrapper(clientId, method, data));
+        String jsonData = serialExecutor.serial(data);
+        this.sendMessage(MinaMessage.createMinaMessage(clientId, method, jsonData));
+    }
+
+    /**
+     * 发送成对消息
+     *
+     * @param method     远程执行方法
+     * @param data       发送数据
+     * @param resultType 接收数据类型
+     */
+    public <T> T sendPairedMessage(String method, Object data, Class<T> resultType) {
+        String jsonData = serialExecutor.serial(data);
+        return this.sendPairedMessage(MinaMessage.createPairedMinaMessage(clientId, method, jsonData), resultType);
     }
 
     /**
      * 发送消息
      *
-     * @param messageData 传输数据
+     * @param minaMessage 消息对象
      */
-    public void sendMessage(MinaMessageData messageData) {
-        session.write(messageData);
+    protected void sendMessage(MinaMessage minaMessage) {
+        minaMessage.setSendDate(System.currentTimeMillis());
+        session.write(minaMessage);
     }
-
 
     public String getHost() {
         return host;

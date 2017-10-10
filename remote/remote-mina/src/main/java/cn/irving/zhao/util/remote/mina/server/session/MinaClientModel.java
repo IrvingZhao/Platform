@@ -24,7 +24,7 @@ public class MinaClientModel {
      *
      * @param message 消息对象
      */
-    public void sendMessage(MinaMessageData message) {
+    public void sendMessage(Object message) {
         session.write(message);
     }
 

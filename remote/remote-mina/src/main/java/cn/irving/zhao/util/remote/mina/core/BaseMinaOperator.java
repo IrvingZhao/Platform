@@ -1,15 +1,14 @@
 package cn.irving.zhao.util.remote.mina.core;
 
 import cn.irving.zhao.util.remote.mina.client.MinaClient;
-import cn.irving.zhao.util.remote.mina.core.filter.MinaMessageSerialFilter;
-import cn.irving.zhao.util.remote.mina.core.filter.MinaMessageSignFilter;
-import cn.irving.zhao.util.remote.mina.core.filter.MinaMessageWrapperFilter;
+import cn.irving.zhao.util.remote.mina.core.filter.*;
 import cn.irving.zhao.util.remote.mina.core.handler.MinaMessageHandler;
+import cn.irving.zhao.util.remote.mina.core.message.MinaMessage;
 import cn.irving.zhao.util.remote.mina.core.method.MinaMessageMethodFactory;
+import cn.irving.zhao.util.remote.mina.core.paired.PairedMessageLock;
 import cn.irving.zhao.util.remote.mina.core.serial.MinaMessageSerialExecutor;
 import cn.irving.zhao.util.remote.mina.core.sign.ClientHashSaltHolder;
 import cn.irving.zhao.util.remote.mina.core.sign.MinaMessageSignExecutor;
-import cn.irving.zhao.util.remote.mina.core.filter.MinaMessageFilter;
 import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
 import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.service.IoService;
@@ -19,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class BaseMinaOperator {
 
@@ -35,6 +36,10 @@ public abstract class BaseMinaOperator {
     public static final String CLIENT_AUTH_METHOD_NAME = "client_auth";
 
     public static final String MESSAGE_VALID_FILTER_NAME = "message_valid";
+
+    public static final String MESSAGE_PAIRED_RESULT_METHOD_NAME = "message_paired_result";
+
+    public static final String MESSAGE_PAIRED_RESULT_FILTER_NAME = "message_paired_filter";
 
     /**
      * 执行方法工厂
@@ -81,6 +86,8 @@ public abstract class BaseMinaOperator {
 
     protected Charset charset = Charset.forName("UTF-8");//编码
 
+    private Map<String, PairedMessageLock> messageLockMap = new ConcurrentHashMap<>();//pairedMessageLock
+
     protected void init() {
         logger.info("mina-base-start");
 
@@ -101,14 +108,13 @@ public abstract class BaseMinaOperator {
                 logger.info("mina-base-addMessageFilter");
                 ioService.getFilterChain().addLast(MESSAGE_VALID_FILTER_NAME, new MinaMessageFilter(messageExpireTime));
             }
-            logger.info("mina-base-addSendMessageWrapperFilter");
-            filterChainBuilder.addLast(MESSAGE_WRAPPER_FILTER_NAME, new MinaMessageWrapperFilter(serialExecutor));//发送消息封装过滤器
             if (messageHandle == null) {
                 if (methodFactory != null) {
                     logger.info("mina-base-setDefaultHandler");
                     ioService.setHandler(new MinaMessageHandler(methodFactory, serialExecutor));
                 }
             }
+            filterChainBuilder.addLast(MESSAGE_PAIRED_RESULT_FILTER_NAME, new MinaMessagePairedResponseFilter(messageLockMap, serialExecutor));
         }
         if (messageHandle != null) {
             logger.info("mina-base-setCustomHandler");
@@ -129,6 +135,40 @@ public abstract class BaseMinaOperator {
     protected abstract IoService getService();
 
     protected abstract void start();
+
+    protected abstract void sendMessage(MinaMessage minaMessage);
+
+    protected <T> T sendPairedMessage(MinaMessage minaMessage, Class<T> resultType) {
+        PairedMessageLock<T> messageResult = getLock(minaMessage.getPairedId(), resultType);
+        synchronized (messageResult) {
+            this.sendMessage(minaMessage);
+            try {
+                messageResult.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (messageResult.getException() == null) {
+                return messageResult.getResult();
+            } else {
+                throw messageResult.getException();
+            }
+        }
+    }
+
+    /**
+     * 获得成对消息锁
+     *
+     * @param pairedId   消息对id
+     * @param resultType 消息返回值类型
+     */
+    protected <T> PairedMessageLock<T> getLock(String pairedId, Class<T> resultType) {
+        PairedMessageLock<T> result;
+        if ((result = messageLockMap.get(pairedId)) == null) {
+            result = new PairedMessageLock<T>(resultType);
+            messageLockMap.put(pairedId, result);
+        }
+        return result;
+    }
 
     public Boolean getEnableMessageFilter() {
         return enableMessageFilter;
