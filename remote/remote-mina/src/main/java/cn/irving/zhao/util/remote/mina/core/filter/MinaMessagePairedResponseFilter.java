@@ -20,21 +20,20 @@ public class MinaMessagePairedResponseFilter extends IoFilterAdapter {
         this.serialExecutor = serialExecutor;
     }
 
-    private Map<String, PairedMessageLock> messageLockMap;
+    private Map<String, PairedMessageLock> messageLockMap;//锁保存map
 
-    private MinaMessageSerialExecutor serialExecutor;
+    private MinaMessageSerialExecutor serialExecutor;//序列化执行器，用于转换响应消息
 
     @Override
     public void messageReceived(NextFilter nextFilter, IoSession session, Object message) throws Exception {
 
-        if (MinaMessage.class.isInstance(message)) {
+        if (MinaMessage.class.isInstance(message)) {//检测消息类型
             MinaMessage minaMessage = (MinaMessage) message;
-            if (BaseMinaOperator.MESSAGE_PAIRED_RESULT_METHOD_NAME.equals(minaMessage.getMethod())) {
-                PairedMessageLock<Object> messageLock = messageLockMap.remove(minaMessage.getPairedId());
-                if (messageLock != null) {
-                    synchronized (messageLock) {
-
-                        if (minaMessage.getErrorId() != null) {
+            if (BaseMinaOperator.METHOD_NAME_MESSAGE_PAIRED_RESULT.equals(minaMessage.getMethod())) {//如果消息的方法是成对消息响应时，执行相关操作
+                PairedMessageLock<Object> messageLock = messageLockMap.remove(minaMessage.getPairedId());//在map中，移除锁，避免多次调用
+                if (messageLock != null) {//检查锁是否为空
+                    synchronized (messageLock) {//同步执行
+                        if (minaMessage.getErrorId() != null) {//检查返回值是否有异常
                             messageLock.setException(new MinaUtilException("服务器出现异常，异常id：" + minaMessage.getErrorId() + "，异常信息：" + minaMessage.getErrorMessage()));
                         } else {
                             Object result = serialExecutor.parse(minaMessage.getData(), messageLock.getResultType());
@@ -48,4 +47,6 @@ public class MinaMessagePairedResponseFilter extends IoFilterAdapter {
         }
         nextFilter.messageReceived(session, message);
     }
+
+
 }

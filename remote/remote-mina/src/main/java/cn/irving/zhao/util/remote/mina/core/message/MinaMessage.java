@@ -58,13 +58,13 @@ public final class MinaMessage {
     }
 
     public MinaMessage generateResultMessage(String data) {
-        MinaMessage result = new MinaMessage(this.clientId, BaseMinaOperator.MESSAGE_PAIRED_RESULT_METHOD_NAME, data);
+        MinaMessage result = new MinaMessage(this.clientId, BaseMinaOperator.METHOD_NAME_MESSAGE_PAIRED_RESULT, data);
         result.pairedId = this.pairedId;
         return result;
     }
 
     public MinaMessage generateErrorMessage(Long errorId, String message) {
-        MinaMessage result = new MinaMessage(this.clientId, BaseMinaOperator.MESSAGE_PAIRED_RESULT_METHOD_NAME, data);
+        MinaMessage result = new MinaMessage(this.clientId, BaseMinaOperator.METHOD_NAME_MESSAGE_PAIRED_RESULT, data);
         result.pairedId = this.pairedId;
         result.errorId = errorId;
         result.errorMessage = message;

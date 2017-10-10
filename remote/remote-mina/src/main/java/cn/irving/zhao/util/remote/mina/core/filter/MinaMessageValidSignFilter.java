@@ -9,11 +9,11 @@ import org.apache.mina.core.write.WriteRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MinaMessageSignFilter extends IoFilterAdapter {
+public class MinaMessageValidSignFilter extends IoFilterAdapter {
 
-    private final Logger logger = LoggerFactory.getLogger(MinaMessageSignFilter.class);
+    private final Logger logger = LoggerFactory.getLogger(MinaMessageValidSignFilter.class);
 
-    public MinaMessageSignFilter(ClientHashSaltHolder saltHolder, MinaMessageSignExecutor signExecutor) {
+    public MinaMessageValidSignFilter(ClientHashSaltHolder saltHolder, MinaMessageSignExecutor signExecutor) {
         this.saltHolder = saltHolder;
         this.signExecutor = signExecutor;
     }

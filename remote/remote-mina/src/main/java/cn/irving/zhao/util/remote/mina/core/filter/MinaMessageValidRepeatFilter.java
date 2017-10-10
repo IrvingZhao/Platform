@@ -13,20 +13,17 @@ import java.util.Map;
 /**
  * mina消息过滤器，超时或重复消息自动过滤
  */
-public class MinaMessageFilter extends IoFilterAdapter {
+public class MinaMessageValidRepeatFilter extends IoFilterAdapter {
 
     private final Logger logger = LoggerFactory.getLogger(MinaMessageSerialFilter.class);
 
-    public MinaMessageFilter(Long messageFilterTime) {
-        this.messageFilterTime = messageFilterTime;
+    public MinaMessageValidRepeatFilter(Long messageFilterTime) {
         TimerUtil.schedule(() -> {//清理messageId映射
             waitCleanMessageIds.clear();
-            waitCleanMessageIds = messageIdCache;
-            messageIdCache = new HashMap<>();
+            waitCleanMessageIds.putAll(messageIdCache);
+            messageIdCache.clear();
         }, messageFilterTime << 1);//清理时间为消息过期时间的2倍，避免误清理
     }
-
-    private Long messageFilterTime;
 
     private Map<String, Boolean> messageIdCache = new HashMap<>();
 
@@ -36,12 +33,9 @@ public class MinaMessageFilter extends IoFilterAdapter {
     public void messageReceived(NextFilter nextFilter, IoSession session, Object message) throws Exception {
         if (MinaMessage.class.isInstance(message)) {
             MinaMessage minaMessage = (MinaMessage) message;
-            if (System.currentTimeMillis() - minaMessage.getSendDate() < messageFilterTime) {// 消息超时
-                if (messageIdCache.get(minaMessage.getMessageId()) == null && waitCleanMessageIds.get(minaMessage.getMessageId()) == null) {//验证客户端
-                    //TODO 拆分 超时 和 客户端认证
-                    logger.info("mina-messageValid-success-{}" + minaMessage.getMessageId());
-                    nextFilter.messageReceived(session, message);
-                }
+            if (messageIdCache.get(minaMessage.getMessageId()) == null && waitCleanMessageIds.get(minaMessage.getMessageId()) == null) {//消息是否重复发送
+                logger.info("mina-messageValid-success-{}" + minaMessage.getMessageId());
+                nextFilter.messageReceived(session, message);
             }
         }
     }

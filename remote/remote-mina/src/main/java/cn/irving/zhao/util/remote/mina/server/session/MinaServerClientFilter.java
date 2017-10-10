@@ -47,7 +47,7 @@ public class MinaServerClientFilter extends IoFilterAdapter {
     public void messageReceived(NextFilter nextFilter, IoSession session, Object message) throws Exception {
         if (MinaMessage.class.isInstance(message)) {
             MinaMessage minaMessage = (MinaMessage) message;
-            if (BaseMinaOperator.CLIENT_AUTH_METHOD_NAME.equals(minaMessage.getMethod())) {
+            if (BaseMinaOperator.METHOD_NAME_CLIENT_REGISTER.equals(minaMessage.getMethod())) {
                 TimerTask task = sessionCleanTaskMap.get(session.getId());
                 boolean result = true;
                 if (task != null) {

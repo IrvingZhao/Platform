@@ -3,15 +3,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.UUID;
+import java.util.concurrent.locks.Lock;
 
 public class Demo {
     public static void main(String[] args) throws Exception {
-        Logger logger = LoggerFactory.getLogger(Demo.class);
-        logger.error("测试-{}-{}", UUID.randomUUID().toString(), "异常信息", new NullPointerException("异常"));
+        StringBuilder builder = new StringBuilder();
+        builder.append("我是第一段");
+        builder.append('\uffff');
+        builder.append("我是第二段");
+        System.out.println(builder.toString());
 
-        Exception exception = new NullPointerException("测试异常");
-        System.out.println(exception.toString());
+        System.out.println(Arrays.toString(builder.toString().split(new String(new char[]{'\uffff'}))));
+
+//        Logger logger = LoggerFactory.getLogger(Demo.class);
+//        logger.error("测试-{}-{}", UUID.randomUUID().toString(), "异常信息", new NullPointerException("异常"));
+//
+//        Exception exception = new NullPointerException("测试异常");
+//        System.out.println(exception.toString());
 //        logger.info("测试");
 //        String s1=ObjectStringSerialUtil.getSerialUtil().serial(null, ObjectStringSerialUtil.SerialType.JSON);
 //        System.out.println(s1.equals("null"));

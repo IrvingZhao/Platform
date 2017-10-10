@@ -25,21 +25,21 @@ public abstract class BaseMinaOperator {
 
     protected final Logger logger = LoggerFactory.getLogger(BaseMinaOperator.class);
 
-    public static final String CODEC_FILTER_NAME = "mina_codec";
+    public static final String FILTER_NAME_CODEC = "filter_message_codec";//编码过滤器名称
 
-    public static final String SERIAL_FILTER_NAME = "mina_serial";
+    public static final String FILTER_NAME_SERIAL = "filter_message_serial";//序列化过滤器名称
 
-    public static final String SIGN_FILTER_NAME = "mina_sign";
+    public static final String FILTER_NAME_MESSAGE_VALID_SIGN = "filter_message_valid_sign";//签名验证过滤器名称
 
-    public static final String MESSAGE_WRAPPER_FILTER_NAME = "mina_message_wrapper";
+    public static final String FILTER_NAME_MESSAGE_TIMEOUT_FILTER = "filter_message_valid_time";//消息过期检测过滤器名称
 
-    public static final String CLIENT_AUTH_METHOD_NAME = "client_auth";
+    public static final String FILTER_NAME_MESSAGE_REPEAT_FILTER = "filter_message_valid_repeat";//消息重复检测过滤器名称
 
-    public static final String MESSAGE_VALID_FILTER_NAME = "message_valid";
+    public static final String FILTER_NAME_MESSAGE_PAIRED_FILTER = "filter_message_paired";//成对消息响应过滤器名称
 
-    public static final String MESSAGE_PAIRED_RESULT_METHOD_NAME = "message_paired_result";
+    public static final String METHOD_NAME_CLIENT_REGISTER = "method_client_register";//客户端注册方法名
 
-    public static final String MESSAGE_PAIRED_RESULT_FILTER_NAME = "message_paired_filter";
+    public static final String METHOD_NAME_MESSAGE_PAIRED_RESULT = "method_paired_message_result";//成对消息响应方法名
 
     /**
      * 执行方法工厂
@@ -67,14 +67,20 @@ public abstract class BaseMinaOperator {
     protected MinaMessageSignExecutor signExecutor;
 
     /**
-     * 开启消息过滤模式，可避免同一条消息被执行多次，默认开启
+     * 重复消息过滤，默认开启
+     * <p>只有在 {@link BaseMinaOperator#enableMessageTimeValid} 有效时才会启用</p>
+     */
+    private Boolean enableMessageRepeatValid = true;
+
+    /**
+     * 消息过时过滤器，系统当前时间-消息发送时间<{@link #messageExpireTime} 时，消息才会执行
      * <p>只有在 {@link BaseMinaOperator#serialExecutor} 存在时才会启用</p>
      */
-    private Boolean enableMessageFilter = true;
+    private Boolean enableMessageTimeValid = true;
 
     /**
      * 消息过期时间
-     * <p>只有在 {@link MinaClient#enableMessageFilter} 为true时才会有效</p>
+     * <p>只有在 {@link MinaClient#enableMessageTimeValid} 为true时才会有效</p>
      */
     private Long messageExpireTime = 2 * 60 * 1000L;
 
@@ -90,54 +96,69 @@ public abstract class BaseMinaOperator {
 
     protected void init() {
         logger.info("mina-base-start");
-
-        DefaultIoFilterChainBuilder filterChainBuilder = new DefaultIoFilterChainBuilder();
-
-        IoService ioService = getService();
-
+        DefaultIoFilterChainBuilder filterChainBuilder = new DefaultIoFilterChainBuilder();//过滤器组
+        IoService ioService = getService();//具体执行类
         logger.info("mina-base-addCodeFilter");
-        filterChainBuilder.addLast(CODEC_FILTER_NAME, new ProtocolCodecFilter(new TextLineCodecFactory(charset)));
+        filterChainBuilder.addLast(FILTER_NAME_CODEC, new ProtocolCodecFilter(new TextLineCodecFactory(charset)));//编码过滤器
         if (serialExecutor != null) {
             logger.info("mina-base-addSerialFilter");
-            filterChainBuilder.addLast(SERIAL_FILTER_NAME, new MinaMessageSerialFilter(serialExecutor));//序列化过滤器
+            filterChainBuilder.addLast(FILTER_NAME_SERIAL, new MinaMessageSerialFilter(serialExecutor));//序列化过滤器
             if (saltHolder != null && signExecutor != null) {//签名过滤器
                 logger.info("mina-base-addSignFilter");
-                filterChainBuilder.addLast(SIGN_FILTER_NAME, new MinaMessageSignFilter(saltHolder, signExecutor));
+                filterChainBuilder.addLast(FILTER_NAME_MESSAGE_VALID_SIGN, new MinaMessageValidSignFilter(saltHolder, signExecutor));
             }
-            if (enableMessageFilter) {//消息是否有效的过滤器
-                logger.info("mina-base-addMessageFilter");
-                ioService.getFilterChain().addLast(MESSAGE_VALID_FILTER_NAME, new MinaMessageFilter(messageExpireTime));
+            if (enableMessageTimeValid) {//消息是否有效的过滤器
+                logger.info("mina-base-addMessageTimeFilter");
+                ioService.getFilterChain().addLast(FILTER_NAME_MESSAGE_TIMEOUT_FILTER, new MinaMessageValidTimeFilter(messageExpireTime));
+                if (enableMessageRepeatValid) {//消息重复过滤
+                    logger.info("mina-base-addMessageRepeatFilter");
+                    ioService.getFilterChain().addLast(FILTER_NAME_MESSAGE_REPEAT_FILTER, new MinaMessageValidRepeatFilter(messageExpireTime));
+                }
             }
-            if (messageHandle == null) {
+            //成对消息响应拦截器
+            filterChainBuilder.addLast(FILTER_NAME_MESSAGE_PAIRED_FILTER, new MinaMessagePairedResponseFilter(messageLockMap, serialExecutor));
+            if (messageHandle == null) {//消息执行器
                 if (methodFactory != null) {
                     logger.info("mina-base-setDefaultHandler");
                     ioService.setHandler(new MinaMessageHandler(methodFactory, serialExecutor));
                 }
             }
-            filterChainBuilder.addLast(MESSAGE_PAIRED_RESULT_FILTER_NAME, new MinaMessagePairedResponseFilter(messageLockMap, serialExecutor));
         }
-        if (messageHandle != null) {
+        if (messageHandle != null) {//自定义执行器不为空，则使用自定义消息执行器
             logger.info("mina-base-setCustomHandler");
             ioService.setHandler(messageHandle);
         }
         logger.info("mina-base-addCustomFilter");
+        //在现有过滤器后添加原有过滤器
         ioService.getFilterChain().getAll().forEach(item -> {
             filterChainBuilder.addLast(item.getName(), item.getFilter());
         });
-
+        //设置过滤器
         ioService.setFilterChainBuilder(filterChainBuilder);
         logger.info("mina-base-starting");
-        start();
+        start();//启动服务
         logger.info("mina-base-success");
 
     }
 
+    /**
+     * 获得服务器端/客户端具体实例
+     */
     protected abstract IoService getService();
 
+    /**
+     * 启动服务
+     */
     protected abstract void start();
 
+    /**
+     * 发送消息
+     */
     protected abstract void sendMessage(MinaMessage minaMessage);
 
+    /**
+     * 发送成对消息
+     */
     protected <T> T sendPairedMessage(MinaMessage minaMessage, Class<T> resultType) {
         PairedMessageLock<T> messageResult = getLock(minaMessage.getPairedId(), resultType);
         synchronized (messageResult) {
@@ -161,31 +182,13 @@ public abstract class BaseMinaOperator {
      * @param pairedId   消息对id
      * @param resultType 消息返回值类型
      */
-    protected <T> PairedMessageLock<T> getLock(String pairedId, Class<T> resultType) {
+    private <T> PairedMessageLock<T> getLock(String pairedId, Class<T> resultType) {
         PairedMessageLock<T> result;
         if ((result = messageLockMap.get(pairedId)) == null) {
             result = new PairedMessageLock<T>(resultType);
             messageLockMap.put(pairedId, result);
         }
         return result;
-    }
-
-    public Boolean getEnableMessageFilter() {
-        return enableMessageFilter;
-    }
-
-    public BaseMinaOperator setEnableMessageFilter(Boolean enableMessageFilter) {
-        this.enableMessageFilter = enableMessageFilter;
-        return this;
-    }
-
-    public Long getMessageExpireTime() {
-        return messageExpireTime;
-    }
-
-    public BaseMinaOperator setMessageExpireTime(Long messageExpireTime) {
-        this.messageExpireTime = messageExpireTime;
-        return this;
     }
 
     public MinaMessageMethodFactory getMethodFactory() {
@@ -220,12 +223,20 @@ public abstract class BaseMinaOperator {
         this.signExecutor = signExecutor;
     }
 
-    public Charset getCharset() {
-        return charset;
+    public Boolean getEnableMessageTimeValid() {
+        return enableMessageTimeValid;
     }
 
-    public void setCharset(Charset charset) {
-        this.charset = charset;
+    public void setEnableMessageTimeValid(Boolean enableMessageTimeValid) {
+        this.enableMessageTimeValid = enableMessageTimeValid;
+    }
+
+    public Long getMessageExpireTime() {
+        return messageExpireTime;
+    }
+
+    public void setMessageExpireTime(Long messageExpireTime) {
+        this.messageExpireTime = messageExpireTime;
     }
 
     public IoHandler getMessageHandle() {
@@ -235,4 +246,29 @@ public abstract class BaseMinaOperator {
     public void setMessageHandle(IoHandler messageHandle) {
         this.messageHandle = messageHandle;
     }
+
+    public Charset getCharset() {
+        return charset;
+    }
+
+    public void setCharset(Charset charset) {
+        this.charset = charset;
+    }
+
+    public Map<String, PairedMessageLock> getMessageLockMap() {
+        return messageLockMap;
+    }
+
+    public void setMessageLockMap(Map<String, PairedMessageLock> messageLockMap) {
+        this.messageLockMap = messageLockMap;
+    }
+
+    public Boolean getEnableMessageRepeatValid() {
+        return enableMessageRepeatValid;
+    }
+
+    public void setEnableMessageRepeatValid(Boolean enableMessageRepeatValid) {
+        this.enableMessageRepeatValid = enableMessageRepeatValid;
+    }
+
 }

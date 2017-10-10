@@ -3,7 +3,6 @@ package cn.irving.zhao.util.remote.mina.server;
 import cn.irving.zhao.util.remote.mina.core.BaseMinaOperator;
 import cn.irving.zhao.util.remote.mina.core.exception.MinaUtilException;
 import cn.irving.zhao.util.remote.mina.core.message.MinaMessage;
-import cn.irving.zhao.util.remote.mina.core.paired.PairedMessageLock;
 import cn.irving.zhao.util.remote.mina.server.session.MinaClientHolder;
 import cn.irving.zhao.util.remote.mina.server.session.MinaClientModel;
 import cn.irving.zhao.util.remote.mina.server.session.MinaServerClientFilter;
@@ -19,7 +18,7 @@ import java.util.LinkedHashMap;
 
 public class MinaServer extends BaseMinaOperator {
 
-    public static final String CLIENT_SIGN_FILTER_NAME = "client_sign";
+    public static final String FILTER_NAME_CLIENT_VALID = "filter_client_valid";//客户端认证filter
 
     public MinaServer() {
     }
@@ -60,7 +59,7 @@ public class MinaServer extends BaseMinaOperator {
     private Boolean enableClientValid = true;
 
     /**
-     * 会话在客户端未验证是保存的时间，单位 毫秒，默认为30秒
+     * 会话在客户端未验证时保存的时间，单位 毫秒，默认为30秒
      * <p>只有在{@link MinaServer#enableClientValid} 为true时才会有效</p>
      */
     private Long clientExpireTime = 30 * 1000L;
@@ -70,22 +69,22 @@ public class MinaServer extends BaseMinaOperator {
     @Override
     public void init() {
         logger.info("mina-server-init");
-        if (this.service == null) {
+        if (this.service == null) { //service 未指定，则创建默认
             logger.info("mina-server-createAcceptor");
             this.service = new NioSocketAcceptor();
         }
-        if (clientHolder == null) {
+        if (clientHolder == null) {//客户端保存器如果未指定，创建默认
             logger.info("mina-server-createClientHolder");
             clientHolder = new MinaClientHolder();
         }
-        if (filters != null && !filters.isEmpty()) {
+        if (filters != null && !filters.isEmpty()) {//filter如果存在，循环添加
             logger.info("mina-server-addCustomFilter");
             filters.forEach(this.service.getFilterChain()::addLast);
         }
-        if (super.serialExecutor != null) {
+        if (super.serialExecutor != null) {//如果定义了序列化执行器，则可选择是否添加客户端认证
             if (enableClientValid) {
                 logger.info("mina-server-addClientValid");
-                this.service.getFilterChain().addLast(CLIENT_SIGN_FILTER_NAME, new MinaServerClientFilter(clientHolder, clientExpireTime));
+                this.service.getFilterChain().addLast(FILTER_NAME_CLIENT_VALID, new MinaServerClientFilter(clientHolder, clientExpireTime));
             }
         }
         logger.info("mina-server-parentInit");
@@ -100,11 +99,9 @@ public class MinaServer extends BaseMinaOperator {
 
     @Override
     protected void start() {
-
         try {
             logger.info("mina-server-start");
             InetAddress address = null;
-
             if (host != null && !host.trim().isEmpty()) {
                 logger.info("mina-server-bindHost-{}", host);
                 address = InetAddress.getByName(host);
@@ -139,7 +136,7 @@ public class MinaServer extends BaseMinaOperator {
      * @param resultType 返回值类型
      */
     public <T> T sendPairedMessage(String clientId, String method, Object data, Class<T> resultType) {
-        String jsonData = serialExecutor.serial(data);
+        String jsonData = serialExecutor.serial(data);//TODO 去除所有位置对 serialExecutor的依赖
         return this.sendPairedMessage(MinaMessage.createPairedMinaMessage(clientId, method, jsonData), resultType);
     }
 
@@ -153,7 +150,6 @@ public class MinaServer extends BaseMinaOperator {
         minaMessage.setSendDate(System.currentTimeMillis());
         client.sendMessage(minaMessage);
     }
-
 
     public String getHost() {
         return host;

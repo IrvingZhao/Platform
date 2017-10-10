@@ -2,7 +2,6 @@ package cn.irving.zhao.util.remote.mina.client;
 
 import cn.irving.zhao.util.remote.mina.core.BaseMinaOperator;
 import cn.irving.zhao.util.remote.mina.core.message.MinaMessage;
-import cn.irving.zhao.util.remote.mina.core.paired.PairedMessageLock;
 import org.apache.mina.core.filterchain.IoFilter;
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoService;
@@ -108,7 +107,7 @@ public class MinaClient extends BaseMinaOperator {
             future.awaitUninterruptibly();
             this.session = future.getSession();
             if (autoRegisterClient) {
-                this.sendMessage(CLIENT_AUTH_METHOD_NAME, "");//注册客户端
+                this.sendMessage(METHOD_NAME_CLIENT_REGISTER, "");//注册客户端
             }
         } catch (UnknownHostException e) {
             e.printStackTrace();
