@@ -9,7 +9,7 @@ public class ServerMethod implements MinaMessageMethod<ServerModel, ServerModel>
     public ServerModel execute(ServerModel data) {
         System.out.println("=============================serverMethodExecute================================");
         System.out.println(data);
-        return null;
+        return new ServerModel("我是服务器", "服务器返回消息");
     }
 
     @Override

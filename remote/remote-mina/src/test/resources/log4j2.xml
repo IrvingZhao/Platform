@@ -25,12 +25,12 @@
             <!-- <AppenderRef ref="RollingFile" /> -->
         </Logger>
         <Logger name="cn.irving.zhao.util.remote" level="debug" additivity="false">
-            <AppenderRef ref="Console"/>
+            <!--<AppenderRef ref="Console"/>-->
             <!--  <AppenderRef ref="RollingFile" /> -->
         </Logger>
-        <!--<Root level="debug">-->
+        <Root level="debug">
             <!--<AppenderRef ref="Console"/>-->
-            <!--&lt;!&ndash; <AppenderRef ref="RollingFile" /> &ndash;&gt;-->
-        <!--</Root>-->
+            <!-- <AppenderRef ref="RollingFile" /> -->
+        </Root>
     </Loggers>
 </Configuration>

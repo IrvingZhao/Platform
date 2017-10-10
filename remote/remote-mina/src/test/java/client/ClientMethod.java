@@ -2,9 +2,9 @@ package client;
 
 import cn.irving.zhao.util.remote.mina.core.method.MinaMessageMethod;
 
-public class ClientMethod implements MinaMessageMethod<ClientModel, ClientModel> {
+public class ClientMethod implements MinaMessageMethod<ClientModel, Object> {
     @Override
-    public ClientModel execute(ClientModel data) {
+    public Object execute(ClientModel data) {
         System.out.println("=============================clientMethodExecute================================");
         System.out.println(data);
         return null;
