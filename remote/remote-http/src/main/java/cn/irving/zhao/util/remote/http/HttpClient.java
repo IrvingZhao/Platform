@@ -75,8 +75,12 @@ public class HttpClient {
      */
     private void generateClient() {
         HttpClientBuilder clientBuilder = HttpClients.custom();
-        generateSSLFactory(clientBuilder);
-        this.charset = this.config.getCharset();
+        if (this.config == null) {
+            this.charset = Charset.defaultCharset();
+        } else {
+            this.charset = this.config.getCharset();
+            generateSSLFactory(clientBuilder);
+        }
         this.client = clientBuilder.build();
 
     }
