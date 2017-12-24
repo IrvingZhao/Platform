@@ -24,13 +24,6 @@ public interface HttpMessage {
     String getRequestUrl();
 
     /**
-     * get请求时需重新替换url
-     *
-     * @param url 新的请求地址
-     */
-    void replaceRequestUrl(String url);
-
-    /**
      * 获得请求方式
      *
      * @return 请求方式
@@ -80,20 +73,20 @@ public interface HttpMessage {
      *
      * @param code 响应代码
      */
-    void setResponseCode(int code);
+    default void setResponseCode(int code){};
 
     /**
      * 设置响应头
      *
      * @param head 响应头
      */
-    void setResponseHead(Map<String, String> head);
+    default void setResponseHead(Map<String, String> head){};
 
     /**
      * 设置响应流
      *
      * @param inputStream 相应流
      */
-    void setResponseStream(InputStream inputStream);
+    default void setResponseStream(InputStream inputStream){};
 
 }

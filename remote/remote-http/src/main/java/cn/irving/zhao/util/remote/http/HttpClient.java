@@ -94,18 +94,17 @@ public class HttpClient {
         try {
             HttpUriRequest request;
             HttpEntity entity = generateHttpEntity(message);
+            String requestUrl=message.getRequestUrl();
             if (message.getRequestMethod() == HttpMethod.GET) {
                 try {
                     String paramStr = EntityUtils.toString(entity, charset);
-                    String url = message.getRequestUrl();
-                    url = url + (url.contains("?") ? "&" : "?") + paramStr;
-                    message.replaceRequestUrl(url);
+                    requestUrl = requestUrl + (requestUrl.contains("?") ? "&" : "?") + paramStr;
                     entity = null;
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
             }
-            request = generateRequest(message.getRequestUrl(), message.getRequestMethod());
+            request = generateRequest(requestUrl, message.getRequestMethod());
             message.getRequestHead().forEach(request::addHeader);
             if (entity != null) {
                 request.setEntity(entity);
